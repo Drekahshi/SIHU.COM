@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f9fa; /* Light background for clean site feel */
+  --foreground: #2c3e50; /* Charcoal text */
+  --card: #ffffff;
+  --card-foreground: #2c3e50;
+  --popover: #ffffff;
+  --popover-foreground: #2c3e50;
+  --primary: #58B3F2; /* Sango Blue */
+  --primary-foreground: #ffffff;
+  --secondary: #1a2e1a; /* Dark Forest */
+  --secondary-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #6c757d;
+  --accent: #56B0ED;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #58B3F2;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: #0f172a; /* Deep Basin Blue */
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --primary: #58B3F2;
+  --primary-foreground: #ffffff;
+  --secondary: #334155;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #38bdf8;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --border: #334155;
+  --input: #334155;
+  --ring: #58B3F2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-merriweather);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), serif;
+  font-weight: 700;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Hover Lift */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+.dark .hover-lift:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Ticker Animation */
+.ticker-wrapper {
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.animate-ticker {
+  display: inline-block;
+  animation: ticker 40s linear infinite;
+  padding-left: 100%;
+}
+
+.animate-ticker:hover {
+    animation-play-state: paused;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Image Hover Zoom */
+.img-zoom-container {
+    overflow: hidden;
+}
+
+.img-zoom {
+    transition: transform 0.5s ease;
+}
+
+.img-zoom-container:hover .img-zoom {
+    transform: scale(1.05);
+}
+
+/* NYC Inspired Premium UI Utilities */
+.text-nyc-header {
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.text-nyc-body {
+  letter-spacing: -0.01em;
+  line-height: 1.7;
+}
+
+.glass-premium {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.dark .glass-premium {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.logo-container-premium {
+  position: relative;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.logo-container-premium::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.logo-container-premium:hover::after {
+  opacity: 1;
+}
+
+/* Scroll Reveal Foundations */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Custom Scrollbar for NYC feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 10px;
+  border: 2px solid var(--background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
