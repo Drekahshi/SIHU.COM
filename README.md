@@ -1,5 +1,37 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Supabase Setup
+
+This project uses Supabase for backend services. To set it up:
+
+### 1. Create a Supabase Project
+1. Go to [supabase.com](https://supabase.com) and create an account
+2. Create a new project
+3. Wait for the database to be set up
+
+### 2. Get Your Project Credentials
+1. Go to your project's API settings
+2. Copy your Project URL and anon/public key
+
+### 3. Set Up Environment Variables
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_SITE_URL=https://your-vercel-domain.vercel.app
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+For Vercel hosting, add the same variables in your Vercel project settings so production metadata and Supabase requests resolve correctly.
+
+### 4. Set Up Database Schema
+1. Go to your Supabase dashboard
+2. Navigate to the SQL Editor
+3. Run the SQL commands from `supabase-schema.sql` to create tables and policies
+
+### 5. Optional: Migrate Existing Data
+If you want to migrate your current localStorage data to Supabase, you can use the admin panel to import articles, podcasts, and events.
+
 ## Getting Started
 
 First, run the development server:
