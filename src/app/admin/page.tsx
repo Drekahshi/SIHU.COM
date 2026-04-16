@@ -9,16 +9,22 @@ import { podcastService } from "@/services/podcastService";
 import { eventService } from "@/services/eventService";
 
 type TickerItem = { id: string; text: string };
+type AIProvider = "openai" | "gemini" | "anthropic";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'article' | 'podcast' | 'event' | 'ticker'>('article');
 
   // ==== AI API GATEWAY ====
+  const [activeProvider, setActiveProvider] = useState<AIProvider>("openai");
   const [openaiKey, setOpenaiKey] = useState("");
   const [geminiKey, setGeminiKey] = useState("");
   const [anthropicKey, setAnthropicKey] = useState("");
+  const [openaiModel, setOpenaiModel] = useState("gpt-4.1-mini");
+  const [geminiModel, setGeminiModel] = useState("gemini-1.5-flash");
+  const [anthropicModel, setAnthropicModel] = useState("claude-3-5-sonnet-latest");
   const [apiSaving, setApiSaving] = useState(false);
   const [savedKeys, setSavedKeys] = useState<{ openai: boolean; gemini: boolean; anthropic: boolean }>({ openai: false, gemini: false, anthropic: false });
+  const [maskedKeys, setMaskedKeys] = useState<{ openai: string | null; gemini: string | null; anthropic: string | null }>({ openai: null, gemini: null, anthropic: null });
   
   // States for Article
   const [articleTitle, setArticleTitle] = useState("");
@@ -78,16 +84,27 @@ export default function AdminDashboard() {
       const res = await fetch('/api/keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ openai: openaiKey, gemini: geminiKey, anthropic: anthropicKey }),
+        body: JSON.stringify({
+          openai: openaiKey,
+          gemini: geminiKey,
+          anthropic: anthropicKey,
+          activeProvider,
+          models: {
+            openai: openaiModel,
+            gemini: geminiModel,
+            anthropic: anthropicModel,
+          },
+        }),
       });
       if (!res.ok) throw new Error('Failed to save keys');
       setSavedKeys({
-        openai: !!openaiKey,
-        gemini: !!geminiKey,
-        anthropic: !!anthropicKey
+        openai: savedKeys.openai || !!openaiKey,
+        gemini: savedKeys.gemini || !!geminiKey,
+        anthropic: savedKeys.anthropic || !!anthropicKey
       });
       setOpenaiKey(""); setGeminiKey(""); setAnthropicKey("");
-      showToast("API keys saved securely!");
+      await loadGatewayConfig();
+      showToast("AI gateway settings saved!");
     } catch {
       showToast("Failed to save API keys", true);
     } finally {
@@ -95,10 +112,37 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadGatewayConfig = async () => {
+    try {
+      const response = await fetch("/api/keys");
+      if (!response.ok) return;
+      const data = await response.json() as {
+        activeProvider: AIProvider;
+        models: Record<AIProvider, string>;
+        configured: Record<AIProvider, boolean>;
+        maskedKeys: { openai: string | null; gemini: string | null; anthropic: string | null };
+      };
+
+      setActiveProvider(data.activeProvider);
+      setOpenaiModel(data.models.openai);
+      setGeminiModel(data.models.gemini);
+      setAnthropicModel(data.models.anthropic);
+      setSavedKeys({
+        openai: data.configured.openai,
+        gemini: data.configured.gemini,
+        anthropic: data.configured.anthropic,
+      });
+      setMaskedKeys(data.maskedKeys);
+    } catch (error) {
+      console.error("Error loading AI gateway config:", error);
+    }
+  };
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     const initializeData = async () => {
       await loadData();
+      await loadGatewayConfig();
       const storedTicker = localStorage.getItem("sango_ticker");
       if (storedTicker) setTickerItems(JSON.parse(storedTicker));
     };
@@ -545,8 +589,19 @@ export default function AdminDashboard() {
                     <p className="font-bold text-sm text-slate-800">OpenAI</p>
                     <p className="text-[10px] text-slate-400">GPT‑4o, GPT‑4 Turbo</p>
                   </div>
+                  {activeProvider === "openai" && <span className="text-[9px] font-black uppercase tracking-widest text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">Active</span>}
                   {savedKeys.openai && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Saved ✓</span>}
                 </div>
+                <button type="button" onClick={() => setActiveProvider("openai")} className={`w-full rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${activeProvider === "openai" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
+                  Use OpenAI in Agent SIHU
+                </button>
+                <input
+                  type="text"
+                  value={openaiModel}
+                  onChange={e => setOpenaiModel(e.target.value)}
+                  placeholder="gpt-4.1-mini"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 transition-all"
+                />
                 <div className="relative">
                   <input
                     id="admin-openai-key"
@@ -558,6 +613,7 @@ export default function AdminDashboard() {
                   />
                   <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
                 </div>
+                {maskedKeys.openai && <p className="text-[11px] text-slate-500">Stored: {maskedKeys.openai}</p>}
               </div>
 
               {/* Gemini */}
@@ -570,8 +626,19 @@ export default function AdminDashboard() {
                     <p className="font-bold text-sm text-slate-800">Gemini</p>
                     <p className="text-[10px] text-slate-400">Gemini 1.5 Pro, Flash</p>
                   </div>
+                  {activeProvider === "gemini" && <span className="text-[9px] font-black uppercase tracking-widest text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">Active</span>}
                   {savedKeys.gemini && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">Saved ✓</span>}
                 </div>
+                <button type="button" onClick={() => setActiveProvider("gemini")} className={`w-full rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${activeProvider === "gemini" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
+                  Use Gemini in Agent SIHU
+                </button>
+                <input
+                  type="text"
+                  value={geminiModel}
+                  onChange={e => setGeminiModel(e.target.value)}
+                  placeholder="gemini-1.5-flash"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
+                />
                 <div className="relative">
                   <input
                     id="admin-gemini-key"
@@ -583,6 +650,7 @@ export default function AdminDashboard() {
                   />
                   <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
                 </div>
+                {maskedKeys.gemini && <p className="text-[11px] text-slate-500">Stored: {maskedKeys.gemini}</p>}
               </div>
 
               {/* Anthropic */}
@@ -595,8 +663,19 @@ export default function AdminDashboard() {
                     <p className="font-bold text-sm text-slate-800">Anthropic</p>
                     <p className="text-[10px] text-slate-400">Claude 3.5 Sonnet, Opus</p>
                   </div>
+                  {activeProvider === "anthropic" && <span className="text-[9px] font-black uppercase tracking-widest text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">Active</span>}
                   {savedKeys.anthropic && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">Saved ✓</span>}
                 </div>
+                <button type="button" onClick={() => setActiveProvider("anthropic")} className={`w-full rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${activeProvider === "anthropic" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
+                  Use Claude in Agent SIHU
+                </button>
+                <input
+                  type="text"
+                  value={anthropicModel}
+                  onChange={e => setAnthropicModel(e.target.value)}
+                  placeholder="claude-3-5-sonnet-latest"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all"
+                />
                 <div className="relative">
                   <input
                     id="admin-anthropic-key"
@@ -608,14 +687,15 @@ export default function AdminDashboard() {
                   />
                   <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
                 </div>
+                {maskedKeys.anthropic && <p className="text-[11px] text-slate-500">Stored: {maskedKeys.anthropic}</p>}
               </div>
             </div>
 
             {/* Footer */}
             <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-              <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+              <p className="text-[11px] text-slate-400 flex items-center gap-1.5 max-w-xl">
                 <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                Keys are transmitted securely and stored encrypted on the backend.
+                Local temp mode: keys are stored only in a local server file for development. This is not secure enough for shared production hosting yet.
               </p>
               <button
                 type="submit"

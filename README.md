@@ -20,6 +20,8 @@ Create a `.env.local` file in the root directory:
 NEXT_PUBLIC_SITE_URL=https://your-vercel-domain.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+AI_SETTINGS_SECRET=strong_secret_used_for_encrypting_ai_keys
 ```
 
 For Vercel hosting, add the same variables in your Vercel project settings so production metadata and Supabase requests resolve correctly.
@@ -31,6 +33,15 @@ For Vercel hosting, add the same variables in your Vercel project settings so pr
 
 ### 5. Optional: Migrate Existing Data
 If you want to migrate your current localStorage data to Supabase, you can use the admin panel to import articles, podcasts, and events.
+
+## SIHU Agent Hosting
+
+SIHU Agent now runs inside the Next.js app through server-side route handlers and `src/lib/agent/*`.
+
+That means:
+- no separate Python hosting is required
+- Vercel can host the chat UI and the retrieval-first agent together
+- Supabase stores articles, chat history, knowledge, and encrypted AI gateway settings
 
 ## Getting Started
 
