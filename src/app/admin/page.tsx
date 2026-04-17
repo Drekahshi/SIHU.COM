@@ -139,7 +139,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     const initializeData = async () => {
       await loadData();
       await loadGatewayConfig();
@@ -301,6 +301,7 @@ export default function AdminDashboard() {
                     width={200} 
                     height={54} 
                     className="h-12 w-auto"
+                    priority
                 />
             </Link>
             <div className="text-center md:text-right">

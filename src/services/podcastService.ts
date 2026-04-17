@@ -22,13 +22,13 @@ export const podcastService = {
       }
 
       // Map Supabase fields to Podcast type
-      return data.map((p: any) => ({
-        id: p.id,
-        title: p.title,
-        episode: p.episode || p.description, // Fallback
-        duration: p.duration,
-        image: p.image || p.image_url, // Handle rename
-        type: 'podcast'
+      return data.map((p: Record<string, unknown>) => ({
+        id: p.id as string,
+        title: p.title as string,
+        episode: (p.episode || p.description) as string, // Fallback
+        duration: p.duration as string,
+        image: (p.image || p.image_url) as string, // Handle rename
+        type: 'podcast' as const
       })) || defaultPodcasts;
     } catch (error) {
       console.error('Error fetching podcasts from Supabase:', error);

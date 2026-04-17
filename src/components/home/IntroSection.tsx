@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import RevealOnScroll from "@/components/ui/RevealOnScroll";
 import { motion, useMotionValue, useTransform } from "framer-motion";
@@ -6,6 +6,11 @@ import { motion, useMotionValue, useTransform } from "framer-motion";
 export default function IntroSection() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const { left, top } = e.currentTarget.getBoundingClientRect();
@@ -75,7 +80,7 @@ export default function IntroSection() {
       
       {/* Floating Data Particles */}
       <div className="absolute inset-0 z-[3] overflow-hidden pointer-events-none">
-        {[...Array(12)].map((_, i) => (
+        {isMounted && [...Array(12)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-primary/30 rounded-full blur-[1px]"

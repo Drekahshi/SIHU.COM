@@ -394,6 +394,7 @@ export default function AgentSihuPage() {
             width={140}
             height={40}
             className="object-contain"
+            priority
           />
           <h1 className="text-lg md:text-xl font-extrabold text-sky-300 font-headline tracking-tight">
             Agent SIHU

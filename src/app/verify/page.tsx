@@ -49,7 +49,7 @@ export default function VerifyAndEarnPage() {
     const earnXp = Math.round((baseXp + aiBonusXp) * multi);
 
     setGamState(prev => {
-      let newXp = prev.xp + earnXp;
+      const newXp = prev.xp + earnXp;
       let newLevel = prev.level;
       
       const nextLevelXp = XP_LEVELS[newLevel] || XP_LEVELS[XP_LEVELS.length - 1];

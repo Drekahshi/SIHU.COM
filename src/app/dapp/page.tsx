@@ -63,7 +63,7 @@ export default function SihuDApp() {
       <div className="flex items-center justify-between px-5 pt-5 pb-3">
         <div className="flex items-center gap-3">
           <div className="float px-4 py-2 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.2)] bg-slate-900 border border-white/10">
-            <Image src="/images/logo-main.png" alt="SIHU Logo" width={120} height={36} className="h-8 w-auto object-contain" />
+            <Image src="/images/logo-main.png" alt="SIHU Logo" width={120} height={36} className="h-8 w-auto object-contain" priority />
           </div>
           <div>
             <h1 className="shimmer-text text-2xl font-black tracking-tighter leading-none">SIHU HUB</h1>

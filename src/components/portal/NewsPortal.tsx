@@ -38,7 +38,7 @@ export default function NewsPortal() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [playingPodcast, setPlayingPodcast] = useState<string | null>(null);
   
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+   
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
@@ -77,7 +77,7 @@ export default function NewsPortal() {
     loadData();
 
     const storedTicker = localStorage.getItem("sango_ticker");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setTickerItems(storedTicker ? JSON.parse(storedTicker) : defaultTicker);
   }, []);
 
@@ -315,7 +315,7 @@ export default function NewsPortal() {
                                         <motion.div 
                                           key={j}
                                           animate={{ height: ['20%', '100%', '20%'] }}
-                                          transition={{ duration: 0.5 + Math.random(), repeat: Infinity }}
+                                          transition={{ duration: 0.5 + (j * 0.1), repeat: Infinity }}
                                           className="w-1 bg-primary rounded-full"
                                         />
                                     ))}

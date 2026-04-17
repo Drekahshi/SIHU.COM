@@ -362,7 +362,7 @@ export function buildStorytellerResponse(params: {
 
   // Handle clarification requests
   if (intent === "clarification") {
-    reply = buildClarificationResponse(message, lastBotResponse, knowledge, mood);
+    reply = buildClarificationResponse(message, lastBotResponse || "", knowledge, mood);
     return {
       reply,
       isStory: false,

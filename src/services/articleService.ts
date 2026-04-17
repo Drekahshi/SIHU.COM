@@ -41,7 +41,7 @@ export const articleService = {
 
       if (error) {
         // `.maybeSingle()` should not error on 0 rows, but guard anyway.
-        if ((error as any)?.code !== 'PGRST116') {
+        if ((error as { code: string })?.code !== 'PGRST116') {
           console.error('Error fetching article from Supabase:', error);
         }
         return getArticleByIdFromStorage(id);

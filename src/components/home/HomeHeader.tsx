@@ -42,6 +42,7 @@ export default function HomeHeader() {
                 width={120} 
                 height={35} 
                 className="h-8 md:h-10 w-auto object-contain"
+                priority
               />
             </div>
             {!isScrolled && (
