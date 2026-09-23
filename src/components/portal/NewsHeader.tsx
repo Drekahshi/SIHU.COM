@@ -34,25 +34,40 @@ export default function NewsHeader() {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-1 font-bold text-[10px] uppercase tracking-widest">
-              {[
-                { name: "Home", href: "/" },
-                { name: "AI Hub", href: "/ai" },
-                { name: "DApp", href: "/dapp" },
-                { name: "Play", href: "/play", icon: "🎮" },
-                { name: "Verify", href: "/verify", icon: "✨", special: true },
-              ].map((link) => (
-                <Link 
-                  key={link.name} 
-                  href={link.href} 
-                  className={`px-4 py-2 rounded-full transition-all flex items-center gap-1.5 ${
-                    link.special 
-                      ? 'bg-primary text-white hover:bg-slate-900 shadow-md' 
-                      : 'text-slate-600 hover:text-primary hover:bg-slate-50'
-                  }`}
-                >
-                  {link.icon && <span>{link.icon}</span>}
-                  {link.name}
-                </Link>
+              {(
+                [
+                  { name: "Portal", href: "/portal" },
+                  { name: "Write Story", href: "/portal/submit" },
+                  { name: "My Stories", href: "/portal/contributor" },
+                  { name: "Review Queue", href: "/admin/review" },
+                  { name: "AI Hub", href: "/ai" },
+                  { name: "Oloolua Site", href: "http://localhost:3002", external: true },
+                ] as { name: string; href: string; external?: boolean; special?: boolean; icon?: string }[]
+              ).map((link) => (
+                link.external ? (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-2 rounded-full transition-all flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                  >
+                    {link.name} ↗
+                  </a>
+                ) : (
+                  <Link 
+                    key={link.name} 
+                    href={link.href} 
+                    className={`px-3 py-2 rounded-full transition-all flex items-center gap-1.5 ${
+                      link.special 
+                        ? 'bg-primary text-white hover:bg-slate-900 shadow-md' 
+                        : 'text-slate-600 hover:text-primary hover:bg-slate-50'
+                    }`}
+                  >
+                    {link.icon && <span>{link.icon}</span>}
+                    {link.name}
+                  </Link>
+                )
               ))}
             </div>
 

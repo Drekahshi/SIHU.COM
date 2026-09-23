@@ -1,117 +1,81 @@
-import { supabase } from '../utils/supabase/client';
 import { Article, defaultArticles } from '../constants/articles';
+import { publishingService } from './content/publishingService';
 
 const STORAGE_KEY = 'sango_articles';
 
 export const articleService = {
   getArticles: async (): Promise<Article[]> => {
+    const local = getArticlesFromStorage();
     try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const published = await publishingService.getPublishedArticles();
+      const mappedPublished: Article[] = published.map(p => ({
+        id: p.id,
+        title: p.title,
+        excerpt: p.summary,
+        content: p.content,
+        author: p.authorName,
+        category: p.category,
+        image: p.coverImageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&auto=format&fit=crop&q=80',
+        time: '5 min read',
+        type: 'article' as const,
+      }));
 
-      if (error) {
-        console.error('Error fetching articles from Supabase:', error);
-        // Fallback to localStorage
-        return getArticlesFromStorage();
-      }
-
-      // If data is empty array (database is empty), fallback to default
-      if (data && data.length === 0) {
-          const localData = getArticlesFromStorage();
-          return localData && localData.length > 0 ? localData : defaultArticles;
-      }
-
-      return data || defaultArticles;
-    } catch (error) {
-      console.error('Error fetching articles from Supabase:', error);
-      // Fallback to localStorage
-      return getArticlesFromStorage();
+      // Combine and deduplicate
+      const existingIds = new Set(mappedPublished.map(a => a.id));
+      const remainingLocal = local.filter(a => !existingIds.has(a.id));
+      return [...mappedPublished, ...remainingLocal];
+    } catch {
+      return local;
     }
   },
 
   getArticleById: async (id: string): Promise<Article | undefined> => {
     try {
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
-
-      if (error) {
-        // `.maybeSingle()` should not error on 0 rows, but guard anyway.
-        if ((error as { code: string })?.code !== 'PGRST116') {
-          console.error('Error fetching article from Supabase:', error);
-        }
-        return getArticleByIdFromStorage(id);
+      const p = await publishingService.getArticleById(id);
+      if (p) {
+        return {
+          id: p.id,
+          title: p.title,
+          excerpt: p.summary,
+          content: p.content,
+          author: p.authorName,
+          category: p.category,
+          image: p.coverImageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&auto=format&fit=crop&q=80',
+          time: '5 min read',
+          type: 'article' as const,
+        };
       }
-
-      // If Supabase returns null (0 rows), fall back to local defaults.
-      return data ?? getArticleByIdFromStorage(id);
-    } catch (error) {
-      console.error('Error fetching article from Supabase:', error);
-      return getArticleByIdFromStorage(id);
-    }
+    } catch { /* fallback */ }
+    return getArticleByIdFromStorage(id);
   },
 
   addArticle: async (article: Article): Promise<void> => {
-    try {
-      const { error } = await supabase
-        .from('articles')
-        .insert([article]);
-
-      if (error) {
-        console.error('Error adding article to Supabase:', error);
-        // Fallback to localStorage
-        addArticleToStorage(article);
-      }
-    } catch (error) {
-      console.error('Error adding article to Supabase:', error);
-      addArticleToStorage(article);
-    }
+    addArticleToStorage(article);
   },
 
   updateArticle: async (id: string, updated: Partial<Article>): Promise<void> => {
-    try {
-      const { error } = await supabase
-        .from('articles')
-        .update(updated)
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error updating article in Supabase:', error);
-        updateArticleInStorage(id, updated);
-      }
-    } catch (error) {
-      console.error('Error updating article in Supabase:', error);
-      updateArticleInStorage(id, updated);
-    }
+    updateArticleInStorage(id, updated);
   },
 
   deleteArticle: async (id: string): Promise<void> => {
-    try {
-      const { error } = await supabase
-        .from('articles')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting article from Supabase:', error);
-        deleteArticleFromStorage(id);
-      }
-    } catch (error) {
-      console.error('Error deleting article from Supabase:', error);
-      deleteArticleFromStorage(id);
-    }
+    deleteArticleFromStorage(id);
   }
 };
 
-// Local storage fallback functions
+// Local storage storage functions
 const getArticlesFromStorage = (): Article[] => {
   if (typeof window === 'undefined') return defaultArticles;
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : defaultArticles;
+  if (!stored) {
+    saveArticlesToStorage(defaultArticles);
+    return defaultArticles;
+  }
+  try {
+    const parsed = JSON.parse(stored);
+    return parsed && parsed.length > 0 ? parsed : defaultArticles;
+  } catch {
+    return defaultArticles;
+  }
 };
 
 const getArticleByIdFromStorage = (id: string): Article | undefined => {
@@ -120,7 +84,7 @@ const getArticleByIdFromStorage = (id: string): Article | undefined => {
 
 const addArticleToStorage = (article: Article) => {
   const articles = getArticlesFromStorage();
-  saveArticlesToStorage([article, ...articles]);
+  saveArticlesToStorage([article, ...articles.filter(a => a.id !== article.id)]);
 };
 
 const updateArticleInStorage = (id: string, updated: Partial<Article>) => {
