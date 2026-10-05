@@ -95,7 +95,7 @@ export default function NewsHero({ mainArticle, sideArticles }: NewsHeroProps) {
                 <span className="text-[9px] font-black text-primary uppercase tracking-widest mb-1.5 px-3 py-1 bg-white/5 w-fit rounded-full border border-white/5">
                   {article.category}
                 </span>
-                <h4 className="font-black text-white text-xs leading-tight line-clamp-2 uppercase tracking-tight group-hover:text-primary transition-colors">
+                <h4 className="font-black text-slate-900 text-xs leading-tight line-clamp-2 uppercase tracking-tight group-hover:text-primary transition-colors">
                   {article.title}
                 </h4>
                 <div className="flex items-center gap-3 mt-3 text-[9px] text-slate-500 font-bold uppercase tracking-widest">

@@ -1,35 +1,51 @@
 import { Article, defaultArticles } from '../constants/articles';
 import { publishingService } from './content/publishingService';
+import { isKaiId, kaiArticle, kaiArticles } from './kaiHubService';
 
 const STORAGE_KEY = 'sango_articles';
+/** The flagship story shown first on the portal. */
+const FEATURED_ID = 'circular-economy-water';
 
 export const articleService = {
   getArticles: async (): Promise<Article[]> => {
-    const local = getArticlesFromStorage();
+    // Order on the portal:
+    // 1. the site's flagship story (Victor and Marvin Bwire) stays on top,
+    // 2. then the newest posts from the SIHU admin (KAI Information Hub),
+    // 3. then stories submitted here, then the rest of the site's own stories.
+    const fromHub = await kaiArticles().catch(() => [] as Article[]);
+    const own = getArticlesFromStorage();
+    let submitted: Article[] = [];
     try {
       const published = await publishingService.getPublishedArticles();
-      const mappedPublished: Article[] = published.map(p => ({
-        id: p.id,
-        title: p.title,
-        excerpt: p.summary,
-        content: p.content,
-        author: p.authorName,
-        category: p.category,
-        image: p.coverImageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&auto=format&fit=crop&q=80',
-        time: '5 min read',
-        type: 'article' as const,
-      }));
-
-      // Combine and deduplicate
-      const existingIds = new Set(mappedPublished.map(a => a.id));
-      const remainingLocal = local.filter(a => !existingIds.has(a.id));
-      return [...mappedPublished, ...remainingLocal];
-    } catch {
-      return local;
-    }
+      submitted = published
+        // The two built-in sample submissions are demo data, not real news.
+        .filter(p => !p.id.startsWith('art_seed_'))
+        .map(p => ({
+          id: p.id,
+          title: p.title,
+          excerpt: p.summary,
+          content: p.content,
+          author: p.authorName,
+          category: p.category,
+          image: p.coverImageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=1200&auto=format&fit=crop&q=80',
+          time: '5 min read',
+          type: 'article' as const,
+        }));
+    } catch { /* submissions are optional */ }
+    const featured = own.find(a => a.id === FEATURED_ID) ?? own[0];
+    const seen = new Set<string>();
+    return [featured, ...fromHub, ...submitted, ...own].filter((a): a is Article => {
+      if (!a || seen.has(a.id)) return false;
+      seen.add(a.id);
+      return true;
+    });
   },
 
   getArticleById: async (id: string): Promise<Article | undefined> => {
+    if (isKaiId(id)) {
+      const fromHub = await kaiArticle(id).catch(() => undefined);
+      if (fromHub) return fromHub;
+    }
     try {
       const p = await publishingService.getArticleById(id);
       if (p) {

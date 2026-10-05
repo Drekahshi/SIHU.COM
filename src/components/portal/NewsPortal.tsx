@@ -11,6 +11,7 @@ import { Article, defaultTicker, Podcast, Event } from "@/constants/articles";
 import { articleService } from "@/services/articleService";
 import { podcastService } from "@/services/podcastService";
 import { eventService } from "@/services/eventService";
+import { kaiEvents, kaiMedia, kaiPodcasts, type MediaItem } from "@/services/kaiHubService";
 import {
   Clock,
   User,
@@ -25,7 +26,11 @@ import {
   Search,
   Mic,
   ArrowUpRight,
-  ExternalLink
+  ExternalLink,
+  Camera,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 export default function NewsPortal() {
@@ -37,6 +42,9 @@ export default function NewsPortal() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [playingPodcast, setPlayingPodcast] = useState<string | null>(null);
+  const [media, setMedia] = useState<MediaItem[]>([]);
+  const [mediaFilter, setMediaFilter] = useState<"all" | "photo" | "video">("all");
+  const [openMedia, setOpenMedia] = useState<number | null>(null);
   
    
   useEffect(() => {
@@ -57,14 +65,19 @@ export default function NewsPortal() {
     // Load data asynchronously
     const loadData = async () => {
       try {
-        const [articlesData, podcastsData, eventsData] = await Promise.all([
+        const [articlesData, podcastsData, eventsData, hubPodcasts, hubEvents, hubMedia] = await Promise.all([
           articleService.getArticles(),
           podcastService.getPodcasts(),
-          eventService.getEvents()
+          eventService.getEvents(),
+          kaiPodcasts().catch(() => []),
+          kaiEvents().catch(() => []),
+          kaiMedia().catch(() => [])
         ]);
         setArticles(articlesData);
-        setPodcasts(podcastsData);
-        setEvents(eventsData);
+        // Posts from the SIHU admin come first, then the site's own.
+        setPodcasts([...hubPodcasts, ...podcastsData]);
+        setEvents([...hubEvents, ...eventsData]);
+        setMedia(hubMedia);
       } catch (error) {
         console.error('Error loading data:', error);
         // Fallback to defaults if services fail
@@ -80,6 +93,19 @@ export default function NewsPortal() {
      
     setTickerItems(storedTicker ? JSON.parse(storedTicker) : defaultTicker);
   }, []);
+
+  // Viewer keys: Escape closes, arrows move between photos and videos.
+  useEffect(() => {
+    if (openMedia === null) return;
+    const count = media.filter(m => mediaFilter === "all" || m.kind === mediaFilter).length;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpenMedia(null);
+      if (e.key === "ArrowRight") setOpenMedia(i => (i === null ? null : (i + 1) % count));
+      if (e.key === "ArrowLeft") setOpenMedia(i => (i === null ? null : (i - 1 + count) % count));
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [openMedia, media, mediaFilter]);
 
   if (!isMounted) {
     return <div className="min-h-screen bg-[#020617] flex items-center justify-center">
@@ -100,6 +126,10 @@ export default function NewsPortal() {
   const mainArticle = filteredArticles.length > 0 ? filteredArticles[0] : null;
   const sideArticles = filteredArticles.slice(1, 4);
   const latestArticles = filteredArticles.slice(4);
+
+  const shownMedia = media.filter(m => mediaFilter === "all" || m.kind === mediaFilter);
+  const current = openMedia !== null ? shownMedia[openMedia] : null;
+  const stepMedia = (d: number) => setOpenMedia(i => (i === null ? null : (i + d + shownMedia.length) % shownMedia.length));
 
   const handleReadArticle = (text: string) => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -265,6 +295,54 @@ export default function NewsPortal() {
                 ))}
             </div>
         </section>
+        {/* 5. PHOTOS & VIDEOS - published by the SIHU admin */}
+        {media.length > 0 && (
+        <section id="media">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-200 pb-4 mb-8 gap-4">
+                <div>
+                   <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+                     Photos &amp; Videos
+                   </h3>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">From the field around the basin</p>
+                </div>
+                <div className="flex gap-2">
+                  {(["all", "photo", "video"] as const).map(f => (
+                    <button key={f} onClick={() => setMediaFilter(f)}
+                      className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${mediaFilter === f ? "bg-sky-500 text-white border-sky-400 shadow-lg shadow-sky-500/20" : "bg-white/60 text-sky-600 border-sky-100 hover:border-sky-300"}`}>
+                      {f === "all" ? "All" : f === "photo" ? "Photos" : "Videos"}
+                    </button>
+                  ))}
+                </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                {shownMedia.map((m, i) => (
+                  <button key={m.id} onClick={() => setOpenMedia(i)}
+                    className="group relative aspect-[4/3] rounded-3xl overflow-hidden bg-slate-100 border border-white/60 shadow-lg hover:shadow-2xl hover:shadow-sky-300/20 hover:-translate-y-1 transition-all duration-500 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400">
+                    {m.image ? (
+                      <Image src={m.image} alt={m.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-sky-400"><PlayCircle size={40} /></div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/10 to-transparent" />
+                    {m.kind === "video" && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="w-14 h-14 rounded-full bg-white/90 text-sky-500 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                          <PlayCircle size={30} fill="currentColor" stroke="white" />
+                        </span>
+                      </div>
+                    )}
+                    <div className="absolute left-0 right-0 bottom-0 p-4">
+                      <span className="inline-flex items-center gap-1.5 bg-sky-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest mb-2">
+                        {m.kind === "video" ? <PlayCircle size={10} /> : <Camera size={10} />} {m.kind === "video" ? "Video" : "Photo"}
+                      </span>
+                      <p className="text-white text-xs md:text-sm font-black leading-snug line-clamp-2">{m.title}</p>
+                    </div>
+                  </button>
+                ))}
+            </div>
+        </section>
+        )}
+
         <section id="podcasts" className="bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-14 relative overflow-hidden shadow-2xl shadow-blue-900/5">
              {/* Decorative Background Elements */}
              <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-[100px] -mr-40 -mt-40"></div>
@@ -283,7 +361,7 @@ export default function NewsPortal() {
             </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 relative z-10">
                  {podcasts.map((podcast, i) => (
-                     <div key={i} onClick={() => setPlayingPodcast(podcast.id)} className="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-sky-100/50 hover:bg-white/80 hover:border-sky-300 transition-all duration-300 flex items-center gap-6 group cursor-pointer hover:shadow-xl">
+                     <div key={i} onClick={() => { const url = (podcast as Podcast & { url?: string }).url; if (url) window.open(url, "_blank", "noopener"); else setPlayingPodcast(podcast.id); }} className="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-sky-100/50 hover:bg-white/80 hover:border-sky-300 transition-all duration-300 flex items-center gap-6 group cursor-pointer hover:shadow-xl">
                          <div className="w-20 h-20 shrink-0 rounded-2xl overflow-hidden relative shadow-2xl border border-white/5 bg-slate-100">
                              <Image 
                                src={podcast.image || '/assets/placeholder-podcast.jpg'} 
@@ -345,12 +423,13 @@ export default function NewsPortal() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {events.map((event, i) => (
-                    <div key={i} className="group relative bg-white/60 backdrop-blur-md border-l-[4px] border-sky-500 p-7 rounded-r-[1.5rem] shadow-sm hover:shadow-xl hover:bg-white/80 transition-all duration-300 overflow-hidden">
+                    <div key={i} onClick={() => { const url = (event as Event & { url?: string }).url; if (url) window.open(url, "_blank", "noopener"); }} className={`group relative bg-white/60 backdrop-blur-md border-l-[4px] border-sky-500 p-7 rounded-r-[1.5rem] shadow-sm hover:shadow-xl hover:bg-white/80 transition-all duration-300 overflow-hidden${(event as Event & { url?: string }).url ? " cursor-pointer" : ""}`}>
                         <div className="absolute top-0 right-0 w-24 h-24 bg-sky-200/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all" />
                         <div className="bg-sky-100 text-sky-600 font-black text-[9px] uppercase mb-5 px-4 py-1.5 rounded-full w-fit tracking-[0.2em] leading-none border border-sky-200/50">
                             {event.date}
                         </div>
                         <h4 className="font-black text-slate-900 text-base mb-4 leading-tight uppercase tracking-tight group-hover:text-sky-600 transition-colors">{event.title}</h4>
+                        {event.description && <p className="text-xs text-slate-500 leading-relaxed mb-2 line-clamp-3">{event.description}</p>}
                         <div className="flex items-center justify-between mt-4">
                             <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                                 <MapPin size={14} strokeWidth={3} className="text-sky-500" />
@@ -363,7 +442,40 @@ export default function NewsPortal() {
             </div>
         </section>
         )}
-      </div>
+            </div>
+
+      {/* Photo and video viewer */}
+      {current && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-10" role="dialog" aria-modal="true" aria-label={current.title}
+          onClick={(e) => { if (e.target === e.currentTarget) setOpenMedia(null); }}>
+          <button onClick={() => setOpenMedia(null)} aria-label="Close" className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><X size={22} /></button>
+          {shownMedia.length > 1 && <>
+            <button onClick={() => stepMedia(-1)} aria-label="Previous" className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><ChevronLeft size={24} /></button>
+            <button onClick={() => stepMedia(1)} aria-label="Next" className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><ChevronRight size={24} /></button>
+          </>}
+          <div className="w-full max-w-5xl">
+            {current.kind === "video" && current.youtubeId ? (
+              <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-2xl bg-black">
+                <iframe className="w-full h-full" src={`https://www.youtube-nocookie.com/embed/${current.youtubeId}?autoplay=1&rel=0`} title={current.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+              </div>
+            ) : current.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={current.image} alt={current.title} className="max-h-[72vh] w-auto mx-auto rounded-3xl shadow-2xl" />
+            ) : null}
+            <div className="mt-5 text-center">
+              <p className="text-white font-black text-lg md:text-xl tracking-tight">{current.title}</p>
+              {current.caption && <p className="text-slate-300 text-sm mt-2 max-w-2xl mx-auto leading-relaxed">{current.caption}</p>}
+              <div className="flex items-center justify-center gap-4 mt-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                <span>{current.date}</span>
+                {current.kind === "video" && current.url && !current.youtubeId && (
+                  <a href={current.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sky-300 hover:text-white"><ExternalLink size={12} /> Watch video</a>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
