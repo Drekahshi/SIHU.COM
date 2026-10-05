@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import NewsHeader from "./NewsHeader";
 import NewsHero from "./NewsHero";
 import NewsCategories from "./NewsCategories";
 import Link from "next/link";
@@ -14,41 +13,57 @@ import { eventService } from "@/services/eventService";
 import { kaiEvents, kaiMedia, kaiPodcasts, type MediaItem } from "@/services/kaiHubService";
 import {
   Clock,
-  User,
   ArrowRight,
   Volume2,
-  VolumeX,
   MapPin,
-  Radio,
   PlayCircle,
-  Tag,
   CalendarDays,
   Search,
-  Mic,
-  ArrowUpRight,
   ExternalLink,
   Camera,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Headphones,
 } from "lucide-react";
+
+const FALLBACK = "/images/lake-victoria-bg.png";
+
+/** next/image with a quiet fallback when a remote picture is missing. */
+function SafeImage({ src, alt, sizes, className, priority }: { src: string | null | undefined; alt: string; sizes: string; className?: string; priority?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <Image src={!src || failed ? FALLBACK : src} alt={alt} fill sizes={sizes} className={className} priority={priority} onError={() => setFailed(true)} />
+  );
+}
+
+function SectionHead({ id, title, sub, children }: { id?: string; title: string; sub?: string; children?: React.ReactNode }) {
+  return (
+    <div id={id} className="scroll-mt-28 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 mb-8 border-b border-slate-200">
+      <div>
+        <h2 className="font-heading text-[26px] md:text-[30px] font-bold text-slate-900 leading-tight">{title}</h2>
+        {sub && <p className="text-[15px] text-slate-500 mt-1">{sub}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
 
 export default function NewsPortal() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
-  const [tickerItems, setTickerItems] = useState<{id: string, text: string}[]>([]);
+  const [tickerItems, setTickerItems] = useState<{ id: string; text: string }[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [playingPodcast, setPlayingPodcast] = useState<string | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [mediaFilter, setMediaFilter] = useState<"all" | "photo" | "video">("all");
   const [openMedia, setOpenMedia] = useState<number | null>(null);
-  
-   
+  const [visible, setVisible] = useState(9);
+
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
 
     // Check if we need to force reset for the new real-world content migration
@@ -56,10 +71,10 @@ export default function NewsPortal() {
     const currentVersion = localStorage.getItem("sango_news_version");
 
     if (currentVersion !== MIGRATION_VERSION) {
-        localStorage.removeItem("sango_articles");
-        localStorage.removeItem("sango_podcasts");
-        localStorage.removeItem("sango_ticker");
-        localStorage.setItem("sango_news_version", MIGRATION_VERSION);
+      localStorage.removeItem("sango_articles");
+      localStorage.removeItem("sango_podcasts");
+      localStorage.removeItem("sango_ticker");
+      localStorage.setItem("sango_news_version", MIGRATION_VERSION);
     }
 
     // Load data asynchronously
@@ -71,7 +86,7 @@ export default function NewsPortal() {
           eventService.getEvents(),
           kaiPodcasts().catch(() => []),
           kaiEvents().catch(() => []),
-          kaiMedia().catch(() => [])
+          kaiMedia().catch(() => []),
         ]);
         setArticles(articlesData);
         // Posts from the SIHU admin come first, then the site's own.
@@ -79,374 +94,308 @@ export default function NewsPortal() {
         setEvents([...hubEvents, ...eventsData]);
         setMedia(hubMedia);
       } catch (error) {
-        console.error('Error loading data:', error);
-        // Fallback to defaults if services fail
+        console.error("Error loading data:", error);
         setArticles([]);
         setPodcasts([]);
         setEvents([]);
+      } finally {
+        setLoaded(true);
       }
     };
 
     loadData();
 
     const storedTicker = localStorage.getItem("sango_ticker");
-     
     setTickerItems(storedTicker ? JSON.parse(storedTicker) : defaultTicker);
   }, []);
 
   // Viewer keys: Escape closes, arrows move between photos and videos.
   useEffect(() => {
     if (openMedia === null) return;
-    const count = media.filter(m => mediaFilter === "all" || m.kind === mediaFilter).length;
+    const count = media.filter((m) => mediaFilter === "all" || m.kind === mediaFilter).length;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpenMedia(null);
-      if (e.key === "ArrowRight") setOpenMedia(i => (i === null ? null : (i + 1) % count));
-      if (e.key === "ArrowLeft") setOpenMedia(i => (i === null ? null : (i - 1 + count) % count));
+      if (e.key === "ArrowRight") setOpenMedia((i) => (i === null ? null : (i + 1) % count));
+      if (e.key === "ArrowLeft") setOpenMedia((i) => (i === null ? null : (i - 1 + count) % count));
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [openMedia, media, mediaFilter]);
 
-  if (!isMounted) {
-    return <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-            <div className="w-16 h-16 bg-primary/20 rounded-full mb-4 border border-primary/30 shadow-[0_0_20px_rgba(88,179,242,0.2)]"></div>
-            <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-[10px]">Initializing Intelligence Feed...</p>
-        </div>
-    </div>;
-  }
+  // Topics the stories actually have, most used first.
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const a of articles) counts.set(a.category, (counts.get(a.category) ?? 0) + 1);
+    return [...counts.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  }, [articles]);
 
-  const filteredArticles = articles.filter(article => {
-    const matchesSearch = article.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          article.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+  const q = searchTerm.trim().toLowerCase();
+  const filtering = q !== "" || selectedCategory !== "All";
+  const filteredArticles = articles.filter((article) => {
+    const matchesSearch = !q || article.title.toLowerCase().includes(q) || article.excerpt.toLowerCase().includes(q) || article.author.toLowerCase().includes(q);
     const matchesCategory = selectedCategory === "All" || article.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const mainArticle = filteredArticles.length > 0 ? filteredArticles[0] : null;
-  const sideArticles = filteredArticles.slice(1, 4);
-  const latestArticles = filteredArticles.slice(4);
+  // Unfiltered: featured story + latest updates on top, the rest below.
+  const mainArticle = filtering ? null : filteredArticles[0] ?? null;
+  const sideArticles = filtering ? [] : filteredArticles.slice(1, 5);
+  // The grid lists every story except the featured one (the side list is a
+  // quick look at the newest; with few stories the grid would look empty).
+  const gridArticles = filtering ? filteredArticles : filteredArticles.slice(1);
 
-  const shownMedia = media.filter(m => mediaFilter === "all" || m.kind === mediaFilter);
+  const shownMedia = media.filter((m) => mediaFilter === "all" || m.kind === mediaFilter);
   const current = openMedia !== null ? shownMedia[openMedia] : null;
-  const stepMedia = (d: number) => setOpenMedia(i => (i === null ? null : (i + d + shownMedia.length) % shownMedia.length));
+  const stepMedia = (d: number) => setOpenMedia((i) => (i === null ? null : (i + d + shownMedia.length) % shownMedia.length));
+  const today = new Date().toLocaleDateString("en-KE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   const handleReadArticle = (text: string) => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
     }
   };
 
+  const openLink = (url?: string) => { if (url) window.open(url, "_blank", "noopener"); };
+
   return (
-    <div className="bg-gradient-to-b from-sky-50 via-white to-blue-50/30 min-h-screen relative overflow-hidden selection:bg-primary selection:text-white">
-      {/* Background Decor - Premium Light Blue */}
-      <div className="fixed inset-0 bg-grid opacity-[0.025] pointer-events-none" />
-      <div className="fixed top-0 left-0 w-full h-[700px] bg-gradient-to-b from-sky-100/60 via-blue-50/30 to-transparent pointer-events-none" />
-      <div className="fixed -top-24 -right-24 w-[260px] h-[260px] sm:w-[380px] sm:h-[380px] md:w-[500px] md:h-[500px] bg-sky-300/20 rounded-full blur-[90px] sm:blur-[110px] md:blur-[140px] pointer-events-none" />
-      <div className="fixed -top-12 -left-12 w-96 h-96 bg-blue-200/25 rounded-full blur-[100px] pointer-events-none" />
-      <div className="fixed bottom-0 right-0 w-80 h-80 bg-indigo-100/30 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* 1. BREAKING NEWS TICKER - Professional Azure */}
-      <div className="border-b border-slate-200 bg-white/80 backdrop-blur-xl py-3.5 relative z-20 shadow-sm">
-        <div className="container mx-auto px-4 lg:px-8">
-            <div className="flex items-center">
-                <span className="bg-rose-600 text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-[0_0_15px_rgba(225,29,72,0.4)] animate-pulse">Live Update</span>
-                <div className="ticker-wrapper ml-6 flex-1 overflow-hidden relative">
-                    <div className="animate-ticker text-[10px] font-black uppercase tracking-widest text-slate-300">
-                        {tickerItems.map(item => (
-                            <React.Fragment key={item.id}>
-                                <span className="mx-6 text-primary font-bold">•</span> {item.text}
-                            </React.Fragment>
-                        ))}
-                        {/* Duplicate for seamless looping */}
-                        {tickerItems.map(item => (
-                            <React.Fragment key={item.id + "_dup"}>
-                                <span className="mx-6 text-primary font-bold">•</span> {item.text}
-                            </React.Fragment>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-4 lg:px-8 py-10 space-y-20">
-          
-        {/* 2. HERO GRID */}
-        <NewsHero mainArticle={mainArticle} sideArticles={sideArticles} />
-
-        {/* 3. CATEGORIES STRIP */}
-        <NewsCategories selectedCategory={selectedCategory} onSelectCategory={setSelectedCategory} />
-
-        {/* 4. LATEST NEWS */}
-         <section id="latest-news">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-200 pb-4 mb-8 gap-4">
-                <div>
-                   <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
-                     Latest Intelligence
-                   </h3>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Basin Environmental Feed</p>
-                </div>
-                <div className="flex gap-4 items-center w-full md:w-auto">
-                    <div className="relative w-full md:w-64">
-                        <input 
-                            type="text" 
-                            placeholder="Search Intelligence..." 
-                            className="w-full pl-10 pr-4 py-3 rounded-2xl text-[10px] uppercase font-black tracking-widest border border-sky-100 bg-white/60 backdrop-blur-md text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all shadow-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <Search className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-sky-600" strokeWidth={3} />
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {latestArticles.map((article, i) => (
-                    <motion.article
-                      key={article.id}
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: i * 0.07 }}
-                      className="group relative glass-premium bg-sky-50/60 rounded-3xl overflow-hidden
-                        border border-white/50 hover:border-white/90
-                        shadow-lg hover:shadow-2xl hover:shadow-sky-300/20
-                        hover:-translate-y-2 hover:scale-[1.02] hover:bg-sky-50/80
-                        h-full flex flex-col transition-all duration-500 focus-within:ring-2 focus-within:ring-sky-400 focus-within:ring-offset-2"
-                    >
-                        {/* Category badge */}
-                        <Link href={`/portal/article/${article.id}`} className="aspect-[16/10] overflow-hidden relative block cursor-pointer focus:outline-none bg-slate-100">
-                            <Image
-                              src={article.image || '/assets/placeholder-article.jpg'}
-                              alt={article.title}
-                              fill
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
-                              className="object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                            {/* Gradient overlay on hover */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-sky-900/60 via-sky-800/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            <div className="absolute inset-0 bg-sky-400/20 opacity-0 group-hover:opacity-100 transition-all duration-500 mix-blend-overlay" />
-                            <div className="absolute top-4 left-4 flex items-center gap-2">
-                                <span className="flex items-center gap-1.5 bg-sky-500 text-white text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-lg border border-white/20">
-                                    <Tag size={10} strokeWidth={2.5} />
-                                    {article.category}
-                                </span>
-                            </div>
-                        </Link>
-
-                        <div className="p-7 flex flex-col flex-1 relative">
-                            {/* Ambient light blobs */}
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-sky-200/30 rounded-full blur-3xl group-hover:bg-sky-300/40 transition-colors duration-500" />
-
-                            {/* Meta row */}
-                            <div className="flex items-center gap-3 text-[10px] text-slate-400 mb-4 font-semibold uppercase tracking-wider relative z-10">
-                                <span className="flex items-center gap-1.5">
-                                    <Clock size={11} strokeWidth={2.5} className="text-sky-400" />
-                                    {article.time}
-                                </span>
-                                <span className="text-sky-300">·</span>
-                                <span className="flex items-center gap-1.5">
-                                    <User size={11} strokeWidth={2.5} className="text-sky-400" />
-                                    {article.author}
-                                </span>
-                            </div>
-
-                            {/* Title */}
-                            <Link href={`/portal/article/${article.id}`}>
-                                <h4 className="text-base font-black text-slate-900 mb-3 leading-snug group-hover:text-sky-600 transition-colors cursor-pointer line-clamp-2 tracking-tight relative z-10">
-                                    {article.title}
-                                </h4>
-                            </Link>
-
-                            {/* Excerpt */}
-                            <Link href={`/portal/article/${article.id}`} className="cursor-pointer flex-1">
-                                <p className="text-slate-500 text-xs font-normal line-clamp-3 mb-6 leading-relaxed relative z-10 group-hover:text-slate-600 transition-colors">
-                                    {article.excerpt}
-                                </p>
-                            </Link>
-
-                            {/* Footer row */}
-                            <div className="mt-auto pt-5 border-t border-sky-100 flex justify-between items-center relative z-10">
-                                <Link
-                                    href={`/portal/article/${article.id}`}
-                                    className="flex items-center gap-2 text-[11px] font-bold text-sky-600 hover:text-sky-800 transition-colors group/btn"
-                                >
-                                    Read Article
-                                    <ArrowRight size={14} strokeWidth={2.5} className="transition-transform group-hover/btn:translate-x-1" />
-                                </Link>
-
-                                <button
-                                    onClick={() => handleReadArticle(article.title + ". " + article.excerpt)}
-                                    aria-label={`Listen to article: ${article.title}`}
-                                    className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400
-                                      hover:text-sky-600 transition-all group/audio px-3 py-2 rounded-xl
-                                      hover:bg-sky-50 border border-transparent hover:border-sky-100
-                                      focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-1"
-                                >
-                                    <Volume2 size={14} strokeWidth={2} className="transition-transform group-hover/audio:scale-110 group-hover/audio:rotate-[-10deg]" />
-                                    Listen
-                                </button>
-                            </div>
-                        </div>
-                    </motion.article>
+    <div className="bg-[#f6f8fb] min-h-screen pt-[72px] text-slate-900">
+      {/* Ticker */}
+      {tickerItems.length > 0 && (
+        <div className="bg-slate-900 text-white">
+          <div className="container mx-auto max-w-7xl px-4 lg:px-8 flex items-center h-11 gap-4">
+            <span className="shrink-0 inline-flex items-center gap-1.5 bg-rose-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-md uppercase tracking-wide">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
+            </span>
+            <div className="ticker-wrapper flex-1 overflow-hidden relative">
+              <div className="animate-ticker text-[13px] font-medium text-slate-200 whitespace-nowrap">
+                {[...tickerItems, ...tickerItems].map((item, i) => (
+                  <React.Fragment key={`${item.id}_${i}`}>
+                    <span className="mx-5 text-sky-400">•</span>{item.text}
+                  </React.Fragment>
                 ))}
+              </div>
             </div>
-        </section>
-        {/* 5. PHOTOS & VIDEOS - published by the SIHU admin */}
-        {media.length > 0 && (
-        <section id="media">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-slate-200 pb-4 mb-8 gap-4">
-                <div>
-                   <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
-                     Photos &amp; Videos
-                   </h3>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">From the field around the basin</p>
-                </div>
-                <div className="flex gap-2">
-                  {(["all", "photo", "video"] as const).map(f => (
-                    <button key={f} onClick={() => setMediaFilter(f)}
-                      className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${mediaFilter === f ? "bg-sky-500 text-white border-sky-400 shadow-lg shadow-sky-500/20" : "bg-white/60 text-sky-600 border-sky-100 hover:border-sky-300"}`}>
-                      {f === "all" ? "All" : f === "photo" ? "Photos" : "Videos"}
+          </div>
+        </div>
+      )}
+
+      {/* Masthead */}
+      <header className="relative overflow-hidden">
+        <Image src="/images/lake-victoria-sunrise-hd.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_60%]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-900/30" />
+        <div className="relative container mx-auto max-w-7xl px-4 lg:px-8 py-12 md:py-16">
+          <p className="text-sky-300 text-[13px] font-semibold">{today}</p>
+          <h1 className="font-heading text-white text-[32px] md:text-5xl font-bold leading-tight mt-2 max-w-3xl">
+            News and stories from the Lake Victoria Basin
+          </h1>
+          <p className="text-slate-300 text-[16px] md:text-lg mt-3 max-w-2xl leading-relaxed">
+            Community reporting on the environment, governance and development, from the Sango Information Hub.
+          </p>
+          <label className="mt-7 flex items-center gap-3 bg-white rounded-full pl-5 pr-2 py-2 max-w-xl shadow-xl focus-within:ring-4 focus-within:ring-sky-400/40">
+            <Search className="w-5 h-5 text-slate-400 shrink-0" />
+            <input
+              type="search"
+              placeholder="Search stories, topics or writers"
+              aria-label="Search stories"
+              className="flex-1 min-w-0 bg-transparent text-[15px] text-slate-900 placeholder:text-slate-400 focus:outline-none py-2"
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setVisible(9); }}
+            />
+            {searchTerm && (
+              <button onClick={() => setSearchTerm("")} aria-label="Clear search" className="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-500 flex items-center justify-center"><X size={18} /></button>
+            )}
+          </label>
+          <nav className="flex flex-wrap gap-x-6 gap-y-2 mt-6 text-[14px] font-semibold text-slate-200" aria-label="Sections">
+            <a href="#latest-news" className="hover:text-white">All stories</a>
+            {media.length > 0 && <a href="#media" className="hover:text-white">Photos &amp; videos</a>}
+            <a href="#podcasts" className="hover:text-white">Podcasts</a>
+            {events.length > 0 && <a href="#events" className="hover:text-white">Events</a>}
+          </nav>
+        </div>
+      </header>
+
+      <div className="container mx-auto max-w-7xl px-4 lg:px-8 py-10 md:py-14 space-y-16 md:space-y-20">
+        {/* Featured + latest updates */}
+        {!isMounted || !loaded ? (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-pulse" aria-label="Loading stories">
+            <div className="lg:col-span-8 h-[420px] lg:h-[540px] rounded-3xl bg-slate-200" />
+            <div className="lg:col-span-4 space-y-4">{[0, 1, 2, 3].map((i) => <div key={i} className="h-24 rounded-xl bg-slate-200" />)}</div>
+          </div>
+        ) : (
+          mainArticle && <NewsHero mainArticle={mainArticle} sideArticles={sideArticles} />
+        )}
+
+        {/* Latest news */}
+        <section>
+          <SectionHead id="latest-news" title={filtering ? "Search results" : "All stories"} sub={filtering ? `${filteredArticles.length} ${filteredArticles.length === 1 ? "story" : "stories"}${selectedCategory !== "All" ? ` in ${selectedCategory}` : ""}${q ? ` for "${searchTerm.trim()}"` : ""}` : "Reporting from correspondents across the basin"} />
+          {categories.length > 1 && (
+            <div className="mb-8">
+              <NewsCategories categories={categories} selectedCategory={selectedCategory} onSelectCategory={(c) => { setSelectedCategory(c); setVisible(9); }} />
+            </div>
+          )}
+
+          {loaded && gridArticles.length === 0 && (
+            <div className="text-center py-16 bg-white rounded-3xl border border-slate-200">
+              <p className="font-heading text-xl font-bold text-slate-900">{filtering ? "No stories match" : "More stories coming soon"}</p>
+              {filtering && (
+                <button onClick={() => { setSearchTerm(""); setSelectedCategory("All"); }} className="mt-4 px-5 py-2.5 rounded-full bg-slate-900 text-white text-sm font-semibold hover:bg-sky-600">Show all stories</button>
+              )}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {gridArticles.slice(0, visible).map((article, i) => (
+              <motion.article
+                key={article.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: Math.min(i, 6) * 0.05 }}
+                className="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 hover:border-slate-300 shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.25)] transition-all duration-300 flex flex-col"
+              >
+                <Link href={`/portal/article/${article.id}`} className="block aspect-[16/10] overflow-hidden relative bg-slate-100">
+                  <SafeImage src={article.image} alt={article.title} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <span className="absolute top-3 left-3 bg-white/95 text-slate-900 text-[12px] font-semibold px-2.5 py-1 rounded-full shadow-sm">{article.category}</span>
+                </Link>
+                <div className="p-5 md:p-6 flex flex-col flex-1">
+                  <Link href={`/portal/article/${article.id}`}>
+                    <h3 className="font-heading text-[18px] font-bold text-slate-900 leading-snug line-clamp-3 group-hover:text-sky-700 transition-colors">{article.title}</h3>
+                  </Link>
+                  <p className="text-slate-600 text-[14.5px] leading-relaxed line-clamp-3 mt-2.5">{article.excerpt}</p>
+                  <div className="mt-auto pt-5 flex items-center justify-between gap-3 text-[13px]">
+                    <span className="text-slate-500 min-w-0 truncate">
+                      <span className="font-semibold text-slate-700">{article.author}</span> · {article.time}
+                    </span>
+                    <button
+                      onClick={() => handleReadArticle(article.title + ". " + article.excerpt)}
+                      aria-label={`Listen to ${article.title}`}
+                      className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-slate-600 hover:text-sky-700 hover:bg-sky-50 font-semibold transition-colors"
+                    >
+                      <Volume2 size={15} /> Listen
                     </button>
-                  ))}
+                  </div>
                 </div>
+              </motion.article>
+            ))}
+          </div>
+
+          {gridArticles.length > visible && (
+            <div className="text-center mt-10">
+              <button onClick={() => setVisible((v) => v + 9)} className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-slate-300 text-slate-900 text-[14px] font-semibold hover:border-slate-900 transition-colors">
+                Show more stories <ArrowRight size={16} />
+              </button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                {shownMedia.map((m, i) => (
-                  <button key={m.id} onClick={() => setOpenMedia(i)}
-                    className="group relative aspect-[4/3] rounded-3xl overflow-hidden bg-slate-100 border border-white/60 shadow-lg hover:shadow-2xl hover:shadow-sky-300/20 hover:-translate-y-1 transition-all duration-500 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400">
-                    {m.image ? (
-                      <Image src={m.image} alt={m.title} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center text-sky-400"><PlayCircle size={40} /></div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/10 to-transparent" />
-                    {m.kind === "video" && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="w-14 h-14 rounded-full bg-white/90 text-sky-500 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                          <PlayCircle size={30} fill="currentColor" stroke="white" />
-                        </span>
-                      </div>
-                    )}
-                    <div className="absolute left-0 right-0 bottom-0 p-4">
-                      <span className="inline-flex items-center gap-1.5 bg-sky-500 text-white text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest mb-2">
-                        {m.kind === "video" ? <PlayCircle size={10} /> : <Camera size={10} />} {m.kind === "video" ? "Video" : "Photo"}
-                      </span>
-                      <p className="text-white text-xs md:text-sm font-black leading-snug line-clamp-2">{m.title}</p>
-                    </div>
+          )}
+        </section>
+
+        {/* Photos & videos - published by the SIHU admin */}
+        {media.length > 0 && (
+          <section>
+            <SectionHead id="media" title="Photos & videos" sub="From the field around the basin">
+              <div className="flex gap-2" role="tablist" aria-label="Show">
+                {(["all", "photo", "video"] as const).map((f) => (
+                  <button key={f} role="tab" aria-selected={mediaFilter === f} onClick={() => setMediaFilter(f)}
+                    className={`px-4 py-2 rounded-full text-[14px] font-semibold border transition-colors ${mediaFilter === f ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-700 border-slate-200 hover:border-slate-400"}`}>
+                    {f === "all" ? "All" : f === "photo" ? "Photos" : "Videos"}
                   </button>
                 ))}
+              </div>
+            </SectionHead>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+              {shownMedia.map((m, i) => (
+                <button key={m.id} onClick={() => setOpenMedia(i)}
+                  className={`group relative rounded-2xl overflow-hidden bg-slate-200 text-left focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 ${i === 0 && shownMedia.length > 4 ? "col-span-2 row-span-2" : "aspect-[4/3]"}`}>
+                  <SafeImage src={m.image} alt={m.title} sizes="(max-width: 768px) 50vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/5 to-transparent" />
+                  {m.kind === "video" && (
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <span className="w-14 h-14 rounded-full bg-white/95 text-slate-900 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform"><PlayCircle size={30} /></span>
+                    </span>
+                  )}
+                  <span className="absolute left-0 right-0 bottom-0 p-3 md:p-4">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-200 mb-1">
+                      {m.kind === "video" ? <PlayCircle size={12} /> : <Camera size={12} />} {m.kind === "video" ? "Video" : "Photo"}
+                    </span>
+                    <span className="block text-white text-[13px] md:text-[15px] font-semibold leading-snug line-clamp-2">{m.title}</span>
+                  </span>
+                </button>
+              ))}
             </div>
-        </section>
+          </section>
         )}
 
-        <section id="podcasts" className="bg-white border border-slate-200 rounded-[2.5rem] p-8 md:p-14 relative overflow-hidden shadow-2xl shadow-blue-900/5">
-             {/* Decorative Background Elements */}
-             <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-[100px] -mr-40 -mt-40"></div>
-             <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-100/30 rounded-full blur-[100px] -ml-40 -mb-40"></div>
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-grid opacity-[0.02]" />
-
-              <div className="flex flex-col md:flex-row justify-between items-center border-b border-sky-100 pb-8 mb-12 relative z-10">
-                <div className="text-center md:text-left mb-6 md:mb-0">
-                    <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tighter uppercase">Intelligence Briefings</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Auditory deep-dives into basin protection</p>
-                </div>
-                <Link href="/portal/podcasts" className="group/nav bg-sky-100/50 hover:bg-sky-500 text-sky-600 hover:text-white transition-all px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-sky-200/50 hover:border-sky-400 shadow-sm flex items-center gap-2">
-                    <Mic size={14} strokeWidth={3} className="transition-transform group-hover/nav:scale-110" />
-                    Access Voice Registry
-                </Link>
+        {/* Podcasts */}
+        <section>
+          <SectionHead id="podcasts" title="Podcasts" sub="Listen to conversations and reports from the basin" />
+          {podcasts.length === 0 ? (
+            <p className="text-slate-500">New episodes are coming soon.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {podcasts.map((podcast) => {
+                const url = (podcast as Podcast & { url?: string }).url;
+                return (
+                  <button key={podcast.id} onClick={() => openLink(url)} disabled={!url}
+                    className="group flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-200/80 text-left hover:border-slate-300 hover:shadow-[0_14px_30px_-16px_rgba(15,23,42,0.25)] transition-all disabled:cursor-default">
+                    <span className="w-20 h-20 shrink-0 rounded-xl overflow-hidden relative bg-slate-100">
+                      <SafeImage src={podcast.image} alt="" sizes="80px" className="object-cover" />
+                      <span className="absolute inset-0 bg-slate-950/25 flex items-center justify-center">
+                        <span className="w-9 h-9 rounded-full bg-white text-slate-900 flex items-center justify-center shadow"><Headphones size={17} /></span>
+                      </span>
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-heading text-[16px] font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-sky-700">{podcast.title}</span>
+                      <span className="block text-[13.5px] text-slate-500 line-clamp-1 mt-1">{podcast.episode}</span>
+                      <span className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold text-sky-700 mt-2">
+                        <Clock size={13} /> {podcast.duration}{url ? " · Listen" : ""}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 relative z-10">
-                 {podcasts.map((podcast, i) => (
-                     <div key={i} onClick={() => { const url = (podcast as Podcast & { url?: string }).url; if (url) window.open(url, "_blank", "noopener"); else setPlayingPodcast(podcast.id); }} className="bg-white/60 backdrop-blur-md p-6 rounded-3xl border border-sky-100/50 hover:bg-white/80 hover:border-sky-300 transition-all duration-300 flex items-center gap-6 group cursor-pointer hover:shadow-xl">
-                         <div className="w-20 h-20 shrink-0 rounded-2xl overflow-hidden relative shadow-2xl border border-white/5 bg-slate-100">
-                             <Image 
-                               src={podcast.image || '/assets/placeholder-podcast.jpg'} 
-                               alt={podcast.title} 
-                               fill
-                               sizes="80px"
-                               className="object-cover group-hover:scale-110 transition-transform duration-700 opacity-80" 
-                             />
-                             <div className="absolute inset-0 bg-sky-500/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                 <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg text-sky-500 scale-90 group-hover:scale-100 transition-transform">
-                                     <PlayCircle size={20} fill="currentColor" stroke="white" />
-                                 </div>
-                             </div>
-                         </div>
-                          <div>
-                             <h5 className="font-black text-slate-900 text-sm mb-1 leading-tight uppercase tracking-tight">{podcast.title}</h5>
-                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest line-clamp-1 mb-3">{podcast.episode}</p>
-                             <div className="flex items-center gap-4 text-[9px] text-sky-600 font-black uppercase tracking-[0.2em]">
-                                 <span className="flex items-center gap-1.5 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-100/50">
-                                    <Clock size={12} strokeWidth={3} className="text-sky-400" />
-                                    {podcast.duration}
-                                 </span>
-                                 <span className="opacity-40">|</span>
-                                 <span className={playingPodcast === podcast.id ? "text-emerald-500 animate-pulse" : ""}>{playingPodcast === podcast.id ? "Receiving Data..." : "Decipher Audio"}</span>
-                             </div>
-                             {playingPodcast === podcast.id && (
-                                <div className="mt-4 flex gap-1 h-3 items-end">
-                                    {[1, 2, 3, 4, 5, 2, 1, 4, 3, 2].map((h, j) => (
-                                        <motion.div 
-                                          key={j}
-                                          animate={{ height: ['20%', '100%', '20%'] }}
-                                          transition={{ duration: 0.5 + (j * 0.1), repeat: Infinity }}
-                                          className="w-1 bg-primary rounded-full"
-                                        />
-                                    ))}
-                                </div>
-                             )}
-                         </div>
-                     </div>
-                 ))}
-                 
-                 {podcasts.length === 0 && (
-                     <p className="text-slate-500 text-sm italic">No podcasts available yet.</p>
-                 )}
-            </div>
+          )}
         </section>
 
-
-        {/* 6. UPCOMING EVENTS */}
+        {/* Events and activities */}
         {events.length > 0 && (
-        <section id="events" className="animate-fade-in pb-20">
-             <div className="flex justify-between items-end border-b border-sky-100 pb-4 mb-8">
-                <div>
-                   <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
-                     Network Deployments
-                   </h3>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Strategic Environment Operations</p>
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {events.map((event, i) => (
-                    <div key={i} onClick={() => { const url = (event as Event & { url?: string }).url; if (url) window.open(url, "_blank", "noopener"); }} className={`group relative bg-white/60 backdrop-blur-md border-l-[4px] border-sky-500 p-7 rounded-r-[1.5rem] shadow-sm hover:shadow-xl hover:bg-white/80 transition-all duration-300 overflow-hidden${(event as Event & { url?: string }).url ? " cursor-pointer" : ""}`}>
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-sky-200/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all" />
-                        <div className="bg-sky-100 text-sky-600 font-black text-[9px] uppercase mb-5 px-4 py-1.5 rounded-full w-fit tracking-[0.2em] leading-none border border-sky-200/50">
-                            {event.date}
-                        </div>
-                        <h4 className="font-black text-slate-900 text-base mb-4 leading-tight uppercase tracking-tight group-hover:text-sky-600 transition-colors">{event.title}</h4>
-                        {event.description && <p className="text-xs text-slate-500 leading-relaxed mb-2 line-clamp-3">{event.description}</p>}
-                        <div className="flex items-center justify-between mt-4">
-                            <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                <MapPin size={14} strokeWidth={3} className="text-sky-500" />
-                                {event.location}
-                            </div>
-                            <ArrowUpRight size={16} strokeWidth={3} className="text-slate-300 group-hover:text-sky-500 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                        </div>
+          <section className="pb-6">
+            <SectionHead id="events" title="Events & activities" sub="What is happening around the lake" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              {events.map((event) => {
+                const url = (event as Event & { url?: string }).url;
+                const d = new Date(event.date);
+                const valid = !Number.isNaN(d.getTime());
+                return (
+                  <div key={event.id} onClick={() => openLink(url)}
+                    className={`group bg-white rounded-2xl border border-slate-200/80 p-5 flex gap-4 hover:border-slate-300 hover:shadow-[0_14px_30px_-16px_rgba(15,23,42,0.25)] transition-all ${url ? "cursor-pointer" : ""}`}>
+                    <div className="w-16 shrink-0 rounded-xl bg-sky-50 border border-sky-100 text-center py-2.5 h-fit">
+                      {valid ? (
+                        <>
+                          <span className="block text-[12px] font-bold uppercase text-sky-700">{d.toLocaleDateString("en-KE", { month: "short" })}</span>
+                          <span className="block font-heading text-2xl font-bold text-slate-900 leading-none mt-0.5">{d.getDate()}</span>
+                        </>
+                      ) : <CalendarDays className="mx-auto text-sky-600" size={22} />}
                     </div>
-                ))}
+                    <div className="min-w-0">
+                      <h3 className="font-heading text-[16px] font-bold text-slate-900 leading-snug group-hover:text-sky-700">{event.title}</h3>
+                      {event.description && <p className="text-[13.5px] text-slate-500 leading-relaxed line-clamp-2 mt-1">{event.description}</p>}
+                      <p className="flex items-center gap-1.5 text-[12.5px] font-semibold text-slate-600 mt-2.5"><MapPin size={13} className="text-sky-600" /> {event.location}</p>
+                      {url && <p className="inline-flex items-center gap-1 text-[12.5px] font-semibold text-sky-700 mt-1.5">More details <ExternalLink size={12} /></p>}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-        </section>
+          </section>
         )}
-            </div>
+      </div>
 
       {/* Photo and video viewer */}
       {current && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-10" role="dialog" aria-modal="true" aria-label={current.title}
+        <div className="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-4 md:p-10" role="dialog" aria-modal="true" aria-label={current.title}
           onClick={(e) => { if (e.target === e.currentTarget) setOpenMedia(null); }}>
           <button onClick={() => setOpenMedia(null)} aria-label="Close" className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"><X size={22} /></button>
           {shownMedia.length > 1 && <>
@@ -455,21 +404,22 @@ export default function NewsPortal() {
           </>}
           <div className="w-full max-w-5xl">
             {current.kind === "video" && current.youtubeId ? (
-              <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-2xl bg-black">
+              <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-2xl bg-black">
                 <iframe className="w-full h-full" src={`https://www.youtube-nocookie.com/embed/${current.youtubeId}?autoplay=1&rel=0`} title={current.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
               </div>
             ) : current.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={current.image} alt={current.title} className="max-h-[72vh] w-auto mx-auto rounded-3xl shadow-2xl" />
+              <img src={current.image} alt={current.title} className="max-h-[72vh] w-auto mx-auto rounded-2xl shadow-2xl" />
             ) : null}
             <div className="mt-5 text-center">
-              <p className="text-white font-black text-lg md:text-xl tracking-tight">{current.title}</p>
-              {current.caption && <p className="text-slate-300 text-sm mt-2 max-w-2xl mx-auto leading-relaxed">{current.caption}</p>}
-              <div className="flex items-center justify-center gap-4 mt-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-white font-heading font-bold text-lg md:text-xl">{current.title}</p>
+              {current.caption && <p className="text-slate-300 text-[15px] mt-2 max-w-2xl mx-auto leading-relaxed">{current.caption}</p>}
+              <div className="flex items-center justify-center gap-4 mt-3 text-[13px] text-slate-400">
                 <span>{current.date}</span>
+                {shownMedia.length > 1 && <span>{(openMedia ?? 0) + 1} / {shownMedia.length}</span>}
                 {current.kind === "video" && current.url && !current.youtubeId && (
-                  <a href={current.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sky-300 hover:text-white"><ExternalLink size={12} /> Watch video</a>
+                  <a href={current.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sky-300 hover:text-white"><ExternalLink size={13} /> Watch video</a>
                 )}
               </div>
             </div>
