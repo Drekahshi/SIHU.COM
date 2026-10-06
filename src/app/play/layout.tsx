@@ -19,7 +19,9 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
       </div>
 
       {/* Play Section Header */}
-      <div className="border-b border-white/5 bg-slate-900/40 backdrop-blur-xl sticky top-0 z-40 pt-4 px-4 sm:px-8">
+      {/* Room for the fixed site header */}
+      <div className="h-[72px]" />
+      <div className="border-b border-white/5 bg-slate-900/80 backdrop-blur-xl sticky top-[72px] z-40 pt-4 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-baseline justify-between gap-4">
           <div className="py-4">
             <h1 className="text-3xl font-black text-white uppercase tracking-tighter">

@@ -379,7 +379,7 @@ export default function AgentSihuPage() {
       </Head>
 
       {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 bg-on-background/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(11,28,48,0.05)] px-4 md:px-6 py-4 flex justify-between items-center">
+      <header className="fixed top-0 w-full z-50 bg-slate-950/95 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-3 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -393,35 +393,35 @@ export default function AgentSihuPage() {
             alt="SIHU Logo"
             width={140}
             height={40}
-            className="object-contain"
+            className="object-contain h-9 w-auto bg-white rounded-lg px-1.5 py-1"
             priority
           />
-          <h1 className="text-lg md:text-xl font-extrabold text-sky-300 font-headline tracking-tight">
+          <h1 className="text-lg md:text-xl font-bold text-white tracking-tight">
             Agent SIHU
           </h1>
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden md:flex gap-6 mr-6">
             <a
-              className="text-slate-400 hover:text-sky-300 transition-colors font-headline text-sm font-bold uppercase tracking-wider"
+              className="text-slate-300 hover:text-white transition-colors text-[14px] font-semibold"
               href="/"
             >
               Home
             </a>
             <a
-              className="text-slate-400 hover:text-sky-300 transition-colors font-headline text-sm font-bold uppercase tracking-wider"
+              className="text-slate-300 hover:text-white transition-colors text-[14px] font-semibold"
               href="/portal"
             >
               News
             </a>
             <a
-              className="text-sky-400 transition-colors font-headline text-sm font-bold uppercase tracking-wider"
+              className="text-sky-300 transition-colors text-[14px] font-semibold"
               href="/ai"
             >
               Agent SIHU
             </a>
             <a
-              className="text-slate-400 hover:text-sky-300 transition-colors font-headline text-sm font-bold uppercase tracking-wider"
+              className="text-slate-300 hover:text-white transition-colors text-[14px] font-semibold"
               href="/dapp"
             >
               DApp

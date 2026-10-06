@@ -1,5 +1,6 @@
-import HomeHeader from "@/components/home/HomeHeader";
+import NewsHeader from "@/components/portal/NewsHeader";
 
+/* The home page shares the news portal's header, so the whole site feels like one. */
 export default function LandingLayout({
   children,
 }: {
@@ -7,7 +8,7 @@ export default function LandingLayout({
 }) {
   return (
     <div className="relative">
-      <HomeHeader />
+      <NewsHeader />
       <main className="w-full">
         {children}
       </main>

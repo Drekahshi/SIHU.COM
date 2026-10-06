@@ -78,13 +78,13 @@ export default function RootLayout({
         </main>
 
         {/* Footer */}
-        <footer className="relative z-10 bg-slate-950 text-white py-24 border-t border-white/5">
+        <footer className="relative z-10 bg-slate-950 text-white pt-20 pb-10 border-t border-white/5">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-16">
                <div className="md:col-span-2">
-                  <h3 className="font-black text-2xl mb-6 uppercase tracking-tighter text-[#58B3F2]">Sango Information Hub</h3>
+                  <h3 className="font-heading font-bold text-2xl mb-5 text-white">Sango Information Hub</h3>
                   <p className="text-slate-400 text-lg font-light leading-relaxed max-w-md">
-                    An elite community media network established for knowledge management and environmental protection across the Lake Victoria Basin.
+                    A registered community media initiative for knowledge, environmental protection and development across the Lake Victoria Basin.
                   </p>
                    <div className="mt-10 flex gap-4">
                     <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-primary transition-all cursor-pointer">
@@ -99,7 +99,7 @@ export default function RootLayout({
                   </div>
                </div>
                <div>
-                  <h4 className="font-black mb-6 uppercase tracking-[0.2em] text-[10px] text-primary">Intelligence</h4>
+                  <h4 className="font-bold mb-5 text-[14px] text-white">News</h4>
                   <ul className="space-y-4 text-slate-400 font-medium text-sm">
                     <li><a href="/portal" className="hover:text-white transition-colors">Latest News</a></li>
                     <li><a href="/portal#podcasts" className="hover:text-white transition-colors">Podcasts</a></li>
@@ -108,22 +108,22 @@ export default function RootLayout({
                   </ul>
                </div>
                <div>
-                  <h4 className="font-black mb-6 uppercase tracking-[0.2em] text-[10px] text-primary">Access</h4>
+                  <h4 className="font-bold mb-5 text-[14px] text-white">Explore</h4>
                   <ul className="space-y-4 text-slate-400 font-medium text-sm">
                     <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
                     <li><Link href="/dapp" className="hover:text-white transition-colors">DApp Dashboard</Link></li>
                     <li><Link href="/login" className="hover:text-white transition-colors">Member Log In</Link></li>
-                    <li><a href="#contact" className="hover:text-white transition-colors">Connect</a></li>
+                    <li><Link href="/#contact" className="hover:text-white transition-colors">Contact us</Link></li>
                   </ul>
                </div>
             </div>
-            <div className="border-t border-white/5 mt-20 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-               <div className="text-slate-500 text-xs font-medium uppercase tracking-widest">
-                  © {new Date().getFullYear()} Sango Information Hub. Elite Media Network.
+            <div className="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+               <div className="text-slate-400 text-[13px]">
+                  © {new Date().getFullYear()} Sango Information Hub. All rights reserved.
                </div>
-               <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                  <span className="hover:text-primary cursor-pointer transition-colors">Privacy Policy</span>
-                  <span className="hover:text-primary cursor-pointer transition-colors">Terms of Reach</span>
+               <div className="flex gap-6 text-[13px] text-slate-400">
+                  <span>Fort Jesus Road, Busia Town</span>
+                  <a href="mailto:sangoinformationhub@gmail.com" className="hover:text-white transition-colors">sangoinformationhub@gmail.com</a>
                </div>
             </div>
           </div>
