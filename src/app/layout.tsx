@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Merriweather, Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import SihuAuthProvider from "@/components/auth/SihuAuth";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -66,6 +67,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
       </head>
       <body className="min-h-screen bg-slate-950 text-foreground flex flex-col font-sans relative overflow-x-hidden">
+        <SihuAuthProvider>
         {/* Technical Overlays */}
         <div className="fixed inset-0 bg-grid pointer-events-none z-0 opacity-40" />
         <div className="fixed inset-0 bg-gradient-to-tr from-[#020617] via-slate-900/20 to-primary/10 pointer-events-none z-0" />
@@ -128,6 +130,7 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+        </SihuAuthProvider>
       </body>
     </html>
   );

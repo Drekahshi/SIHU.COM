@@ -5,7 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogIn } from "lucide-react";
+import { Menu, X, LogIn, UserRound } from "lucide-react";
+import { useSihuAuth } from "@/components/auth/SihuAuth";
 
 /* Same destinations as before; a clean, readable news-site bar. */
 const LINKS = [
@@ -20,6 +21,9 @@ const LINKS = [
 export default function NewsHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const path = usePathname() ?? "";
+  const auth = useSihuAuth();
+  const who = auth.name?.split(" ")[0] ?? auth.email?.split("@")[0] ?? "Account";
+  const loginHref = path && path !== "/login" ? `/login?next=${encodeURIComponent(path)}` : "/login";
   const isActive = (href: string) => (href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`));
 
   return (
@@ -57,9 +61,16 @@ export default function NewsHeader() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Link href="/login" className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-full hover:bg-sky-600 transition-colors text-[13px] font-semibold">
-              <LogIn size={15} /> Log in
-            </Link>
+            {auth.signedIn ? (
+              <Link href="/login" title={auth.email ?? undefined} className="hidden sm:inline-flex items-center gap-2 pl-1.5 pr-4 py-1.5 rounded-full border border-slate-200 hover:border-slate-400 text-slate-800 text-[13px] font-semibold transition-colors">
+                <span className="w-7 h-7 rounded-full bg-sky-600 text-white flex items-center justify-center text-[12px] font-bold">{who.charAt(0).toUpperCase()}</span>
+                <span className="max-w-[120px] truncate">{who}</span>
+              </Link>
+            ) : (
+              <Link href={loginHref} className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-full hover:bg-sky-600 transition-colors text-[13px] font-semibold">
+                <LogIn size={15} /> Log in
+              </Link>
+            )}
             <button
               className="lg:hidden w-11 h-11 inline-flex items-center justify-center text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -94,11 +105,11 @@ export default function NewsHeader() {
                 </Link>
               ))}
               <Link
-                href="/login"
+                href={auth.signedIn ? "/login" : loginHref}
                 onClick={() => setMobileMenuOpen(false)}
                 className="mt-4 inline-flex items-center justify-center gap-2 w-full py-3.5 bg-slate-900 text-white font-semibold text-[15px] rounded-full"
               >
-                <LogIn size={16} /> Member log in
+                {auth.signedIn ? <><UserRound size={16} /> {who}</> : <><LogIn size={16} /> Log in</>}
               </Link>
             </div>
           </motion.div>
