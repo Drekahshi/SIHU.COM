@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useMemo } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { PrivyProvider, useLoginWithOAuth, usePrivy } from "@privy-io/react-auth";
 
 /*
@@ -51,10 +51,28 @@ function Bridge({ children }: { children: React.ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
+const LOADING: SihuAuth = { ...OFF, ready: false, available: true };
+const cleanId = (v: string | undefined | null) => (v ?? "").trim().replace(/^["']|["']$/g, "");
+
 export default function SihuAuthProvider({ children }: { children: React.ReactNode }) {
   // Privy app ids are 25 characters; a wrong value must not take the site down.
-  const appId = (process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "").trim().replace(/^["']|["']$/g, "");
-  if (appId.length !== 25) return <Ctx.Provider value={OFF}>{children}</Ctx.Provider>;
+  // The id is baked in at build time when Vercel has it; otherwise it is
+  // fetched from this site's server, which reads the setting at run time.
+  const built = cleanId(process.env.NEXT_PUBLIC_PRIVY_APP_ID);
+  const [appId, setAppId] = useState<string | null | undefined>(built.length === 25 ? built : undefined);
+
+  useEffect(() => {
+    if (appId !== undefined) return;
+    let live = true;
+    fetch("/api/auth/config", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { appId?: string | null }) => { if (live) setAppId(cleanId(d.appId).length === 25 ? cleanId(d.appId) : null); })
+      .catch(() => { if (live) setAppId(null); });
+    return () => { live = false; };
+  }, [appId]);
+
+  if (appId === undefined) return <Ctx.Provider value={LOADING}>{children}</Ctx.Provider>;
+  if (appId === null) return <Ctx.Provider value={OFF}>{children}</Ctx.Provider>;
   return (
     <PrivyProvider
       appId={appId}
