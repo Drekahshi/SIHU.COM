@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { runSihuAgent } from "@/lib/agent/runtime";
 import { chatWithProvider } from "@/lib/ai/providers";
 import { readAIConfig } from "@/lib/ai/config-store";
+import { clientIp, rateLimit } from "@/lib/security/guard";
 
 type ChatTurn = {
   role: "user" | "assistant";
@@ -86,6 +87,14 @@ function isStoryResponse(text: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  // Each answer can cost money on the AI account: 20 questions a minute per visitor.
+  const limited = rateLimit(`chat:${clientIp(req)}`, 20, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json({ error: "You are sending messages very fast. Please wait a minute." }, { status: 429, headers: { "Retry-After": String(limited.retryAfter) } });
+  }
+  if (Number(req.headers.get("content-length") ?? 0) > 64 * 1024) {
+    return NextResponse.json({ error: "That message is too long." }, { status: 413 });
+  }
   try {
     const body = (await req.json()) as {
       message?: string;
@@ -93,10 +102,18 @@ export async function POST(req: NextRequest) {
       history?: ChatTurn[];
     };
 
-    const message = body.message?.trim();
+    const message = typeof body.message === "string" ? body.message.trim() : "";
     if (!message) {
       return NextResponse.json({ error: "Message is required." }, { status: 400 });
     }
+    if (message.length > 4000) {
+      return NextResponse.json({ error: "Please keep your message under 4,000 characters." }, { status: 400 });
+    }
+    // Only the last few turns, and only plain text, are passed to the AI.
+    body.history = Array.isArray(body.history)
+      ? body.history.slice(-8).filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.content === "string").map((t) => ({ role: t.role, content: t.content.slice(0, 4000) }))
+      : [];
+    body.sessionId = typeof body.sessionId === "string" ? body.sessionId.slice(0, 80) : undefined;
 
     const agentResult = await runSihuAgent({
       sessionId: body.sessionId || "web-session",

@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
       {
         source: "/api/:path*",
         headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
+          // Any site may call the public APIs, but never with the visitor's cookies.
           { key: "Access-Control-Allow-Origin", value: "*" },
           { key: "Access-Control-Allow-Methods", value: "GET,POST,OPTIONS" },
           {
@@ -62,9 +62,16 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Mobile viewport optimization
+        // Mobile viewport optimization and security headers on every page
         source: "/:path*",
         headers: [
+          // No other site may show SIHU inside a frame (clickjacking / fake login pages).
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://*.privy.io https://accounts.google.com" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+          { key: "Permissions-Policy", value: "camera=(), geolocation=(), payment=(), microphone=(self)" },
           {
             key: "X-DNS-Prefetch-Control",
             value: "on",

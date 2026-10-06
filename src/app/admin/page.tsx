@@ -79,11 +79,16 @@ export default function AdminDashboard() {
 
   const handleSaveApiKeys = async (e: React.FormEvent) => {
     e.preventDefault();
+    // The server only accepts changes with the SIHU admin key (SIHU_ADMIN_KEY in Vercel).
+    let adminKey = '';
+    try { adminKey = sessionStorage.getItem('sihu_admin_key') || ''; } catch { /* storage blocked */ }
+    if (!adminKey) adminKey = window.prompt('Enter the SIHU admin key to save these settings') || '';
+    if (!adminKey) return;
     setApiSaving(true);
     try {
       const res = await fetch('/api/keys', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
         body: JSON.stringify({
           openai: openaiKey,
           gemini: geminiKey,
@@ -96,7 +101,13 @@ export default function AdminDashboard() {
           },
         }),
       });
+      if (res.status === 401) {
+        try { sessionStorage.removeItem('sihu_admin_key'); } catch { /* ignore */ }
+        showToast('Wrong admin key', true);
+        return;
+      }
       if (!res.ok) throw new Error('Failed to save keys');
+      try { sessionStorage.setItem('sihu_admin_key', adminKey); } catch { /* ignore */ }
       setSavedKeys({
         openai: savedKeys.openai || !!openaiKey,
         gemini: savedKeys.gemini || !!geminiKey,
