@@ -46,7 +46,7 @@ export default function MinePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0F172A] text-white p-4 pt-8 pb-24 flex flex-col gap-6">
+    <main className="text-white p-4 pt-8 pb-24 flex flex-col gap-6 w-full max-w-6xl mx-auto lg:px-8">
 
       {/* Header */}
       <div className="flex flex-col gap-2">

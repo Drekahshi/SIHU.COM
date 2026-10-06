@@ -18,7 +18,7 @@ export default function SwapPage() {
   const rate = 1.24; // mock rate
 
   return (
-    <main className="p-4 pt-10 pb-24 flex flex-col items-center min-h-[90vh] bg-[#0F172A] justify-center gap-6">
+    <main className="p-4 pt-10 pb-24 flex flex-col items-center min-h-[90vh] justify-center gap-6 w-full max-w-6xl mx-auto lg:px-8">
 
       {/* Title */}
       <div className="w-full max-w-[500px]">

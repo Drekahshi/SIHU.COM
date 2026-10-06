@@ -11,7 +11,7 @@ export default function PoolsPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#0F172A] p-4 pt-6 pb-24 flex flex-col gap-6 text-white">
+    <main className="p-4 pt-6 pb-24 flex flex-col gap-6 text-white w-full max-w-6xl mx-auto lg:px-8">
       
       {/* Header */}
       <div className="flex flex-col gap-2">

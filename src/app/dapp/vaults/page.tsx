@@ -22,7 +22,7 @@ export default function VaultsPage() {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <main className="min-h-screen bg-[#0F172A] text-white p-4 pt-8 pb-24 flex flex-col gap-6">
+    <main className="text-white p-4 pt-8 pb-24 flex flex-col gap-6 w-full max-w-6xl mx-auto lg:px-8">
 
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-black tracking-tighter uppercase flex items-center gap-3">
