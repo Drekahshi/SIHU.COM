@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { BarChart3, Crown } from "lucide-react";
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -21,7 +22,7 @@ export default function PlayHubPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700" />
               
               <div className="mb-8 w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center text-4xl border border-primary/30 group-hover:scale-110 transition-transform">
-                📊
+                <BarChart3 size={30} />
               </div>
               
               <h2 className="text-3xl font-black text-white mb-4 tracking-tighter uppercase">Predictions <br />Market</h2>
@@ -49,7 +50,7 @@ export default function PlayHubPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:scale-150 transition-transform duration-700" />
               
               <div className="mb-8 w-16 h-16 rounded-2xl bg-accent/20 flex items-center justify-center text-4xl border border-accent/30 group-hover:scale-110 transition-transform">
-                ♟️
+                <Crown size={30} />
               </div>
               
               <h2 className="text-3xl font-black text-white mb-4 tracking-tighter uppercase">AI Strategic<br />Chess</h2>

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Crown, Lightbulb } from "lucide-react";
 import ChessGame from "../../../components/portal/play/ChessGame";
 
 export default function ChessPage() {
@@ -10,7 +11,7 @@ export default function ChessPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-8">
         <div className="max-w-xl">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-xl font-black text-rose-500 drop-shadow-[0_0_10px_rgba(244,63,94,0.4)]">♟️</span>
+            <span className="text-xl font-black text-rose-500 drop-shadow-[0_0_10px_rgba(244,63,94,0.4)]"><Crown size={20} /></span>
             <h2 className="text-xl font-black text-white uppercase tracking-tighter">Strategic Staking Hub</h2>
           </div>
           <p className="text-slate-400 text-sm leading-relaxed font-medium">
@@ -40,7 +41,7 @@ export default function ChessPage() {
       
       {/* Footer Info */}
       <div className="mt-8 p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-start gap-3">
-        <div className="text-primary text-xl">💡</div>
+        <div className="text-primary"><Lightbulb size={20} /></div>
         <div className="text-xs text-slate-300 leading-relaxed">
           <strong>Tip:</strong> SIHU Chess uses a difficulty curve based on your current Verifier Level. Higher-level agents play against more advanced AI models for higher staking multipliers.
         </div>

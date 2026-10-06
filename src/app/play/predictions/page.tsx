@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { PredictionList, StakingInterface, ResultTracker, PredictionMarket } from '../../../components/portal/play/Predictions';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Zap, BarChart3 } from "lucide-react";
 
 const MOCK_MARKETS: PredictionMarket[] = [
   {
@@ -82,7 +82,7 @@ export default function PredictionsPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between border-b border-white/5 pb-4">
             <h2 className="text-xl font-black flex items-center gap-2">
-              <span className="text-primary tracking-tighter">⚡</span> Active Markets
+              <Zap size={18} className="inline -mt-1 mr-1.5 text-primary" />Active markets
             </h2>
             <span className="text-[10px] font-bold text-slate-500 bg-slate-800 px-3 py-1 rounded-full uppercase tracking-widest border border-white/5">
               Live Network Feed
@@ -106,7 +106,7 @@ export default function PredictionsPage() {
       <div className="pt-12 border-t border-white/10">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-black flex items-center gap-2">
-            <span className="text-amber-500 tracking-tighter">📊</span> Network Performance History
+            <BarChart3 size={18} className="inline -mt-1 mr-1.5 text-amber-500" />Network performance history
           </h2>
           <button className="text-[10px] sm:text-xs text-slate-500 font-black uppercase tracking-widest hover:text-primary transition-all cursor-pointer flex items-center gap-2 group/all bg-slate-900/50 px-4 py-2 rounded-xl border border-white/5 hover:border-primary/30 hover:bg-slate-900 shadow-sm">
             View All Reports 

@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { BarChart3, Crown } from "lucide-react";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import NewsHeader from '../../components/portal/NewsHeader';
@@ -37,13 +38,13 @@ export default function PlayLayout({ children }: { children: React.ReactNode }) 
               href="/play/predictions" 
               className={`px-6 py-3 font-bold text-sm tracking-wide rounded-t-xl transition-all border-b-2 ${pathname === '/play/predictions' ? 'bg-white/10 text-primary border-primary' : 'hover:bg-white/5 border-transparent text-slate-400'}`}
             >
-              📊 Predictions Market
+              <BarChart3 size={15} className="inline -mt-0.5 mr-1.5" />Predictions market
             </Link>
             <Link 
               href="/play/chess" 
               className={`px-6 py-3 font-bold text-sm tracking-wide rounded-t-xl transition-all border-b-2 ${pathname === '/play/chess' ? 'bg-white/10 text-primary border-primary' : 'hover:bg-white/5 border-transparent text-slate-400'}`}
             >
-              ♟️ AI Chess Staking
+              <Crown size={15} className="inline -mt-0.5 mr-1.5" />AI chess
             </Link>
           </div>
         </div>

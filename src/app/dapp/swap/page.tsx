@@ -90,7 +90,7 @@ export default function SwapPage() {
           ${amount && parseFloat(amount) > 0
             ? "btn-blue shadow-[0_0_25px_rgba(37,99,235,0.3)] hover:-translate-y-1"
             : "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"}`}>
-          {amount && parseFloat(amount) > 0 ? `Execute Swap ${fromToken.symbol} ➜ ${toToken.symbol}` : "Enter Input Amount"}
+          {amount && parseFloat(amount) > 0 ? `Execute Swap ${fromToken.symbol} to ${toToken.symbol}` : "Enter Input Amount"}
         </button>
       </div>
 

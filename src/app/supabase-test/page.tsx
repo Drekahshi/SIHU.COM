@@ -30,10 +30,10 @@ export default function SupabaseTestPage() {
           status: 'error',
           message: 'Failed to test connection',
           details: {
-            supabaseUrl: '❌ Error',
-            supabaseKey: '❌ Error',
-            connection: '❌ Error',
-            database: '❌ Error',
+            supabaseUrl: 'Error',
+            supabaseKey: 'Error',
+            connection: 'Error',
+            database: 'Error',
             tables: null
           }
         });
@@ -63,7 +63,7 @@ export default function SupabaseTestPage() {
               {status?.status === 'success' ? 'check_circle' : 'error'}
             </span>
             <h2 className="text-2xl font-headline font-bold text-white">
-              {status?.status === 'success' ? '✅ Connected!' : '❌ Connection Issue'}
+              {status?.status === 'success' ? 'Connected!' : 'Connection Issue'}
             </h2>
           </div>
           <p className="text-slate-300 text-lg">{status?.message}</p>
@@ -138,7 +138,7 @@ export default function SupabaseTestPage() {
           <div className="bg-green-900/20 border border-green-500/30 rounded-2xl p-6 mt-8">
             <div className="flex items-center gap-3 mb-4">
               <span className="material-symbols-outlined text-green-400">celebration</span>
-              <h3 className="text-xl font-headline font-bold text-green-400">🎉 Setup Complete!</h3>
+              <h3 className="text-xl font-headline font-bold text-green-400">Setup Complete!</h3>
             </div>
             <p className="text-green-200 mb-4">
               Your Supabase database is fully configured and ready to use!

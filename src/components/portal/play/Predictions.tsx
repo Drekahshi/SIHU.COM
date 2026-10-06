@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { Target } from "lucide-react";
 
 /** ─── MODELS ─── **/
 
@@ -97,7 +98,7 @@ export function StakingInterface({ market }: { market: PredictionMarket | null }
   if (!market) {
     return (
       <div className="bg-slate-800/50 border border-white/5 rounded-2xl p-8 text-center flex flex-col items-center justify-center min-h-[300px]">
-        <div className="text-4xl mb-4 opacity-20">🎯</div>
+        <div className="mb-4 opacity-30 flex justify-center"><Target size={38} /></div>
         <h3 className="text-lg font-bold text-slate-300">Select a Market</h3>
         <p className="text-sm text-slate-500 mt-2">Choose an active market from the list to start trading on outcomes.</p>
       </div>
@@ -177,7 +178,7 @@ export function StakingInterface({ market }: { market: PredictionMarket | null }
           {loading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
-            <>🚀 Place Trade</>
+            <>Place trade</>
           )}
         </button>
       </div>

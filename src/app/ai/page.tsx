@@ -1,8 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Head from "next/head";
-import Image from "next/image";
+import Link from "next/link";
+import NewsHeader from "@/components/portal/NewsHeader";
+import {
+  Bot, Send, Mic, MicOff, Paperclip, X, Volume2, VolumeX, Square, BookOpen, Activity, Gift, Newspaper,
+  Search, Waves, Gavel, Plus, PanelLeft, Sparkles, User, type LucideIcon,
+} from "lucide-react";
 
 // Mobile detection hook
 function useIsMobile() {
@@ -39,10 +43,30 @@ interface Tool {
   enabled: boolean;
 }
 
+
+/** Renders a reply as text with **bold** parts; never as raw HTML. */
+function RichText({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/(\*\*[^*]+\*\*)/g).map((part, i) =>
+        /^\*\*[^*]+\*\*$/.test(part) ? <strong key={i}>{part.slice(2, -2)}</strong> : <React.Fragment key={i}>{part}</React.Fragment>
+      )}
+    </>
+  );
+}
+
+const TOOL_ICON: Record<string, LucideIcon> = { search: Search, auto_stories: BookOpen, water: Waves, gavel: Gavel };
+
+const SUGGESTIONS: { Icon: LucideIcon; title: string; prompt: string }[] = [
+  { Icon: BookOpen, title: "Tell me a Sango story", prompt: "Tell me a story about Sango and the Lake Victoria Basin" },
+  { Icon: Activity, title: "How healthy is the basin?", prompt: "What is basin health mining and how is the lake doing?" },
+  { Icon: Gift, title: "How do I earn rewards?", prompt: "How can I earn SIHU rewards for stewardship work?" },
+  { Icon: Newspaper, title: "Latest news", prompt: "What are the latest news and updates from SIHU?" },
+];
+
 export default function AgentSihuPage() {
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -82,8 +106,11 @@ export default function AgentSihuPage() {
     { id: "governance", name: "Governance", icon: "gavel", enabled: false },
   ]);
 
+  // Scroll only the conversation, never the whole page.
+  const chatScrollRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = chatScrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -368,623 +395,232 @@ export default function AgentSihuPage() {
     );
   };
 
+  const pickPrompt = (prompt: string) => {
+    hapticFeedback();
+    setInputValue(prompt);
+    textareaRef.current?.focus();
+  };
+
+  const newChat = () => {
+    stopSpeaking();
+    setMessages([]);
+    setInputValue("");
+    setAttachments([]);
+    setSidebarOpen(false);
+  };
+
+  const sidebar = (
+    <div className="flex flex-col h-full">
+      <button onClick={newChat} className="inline-flex items-center justify-center gap-2 w-full py-3 rounded-full bg-slate-900 hover:bg-sky-600 text-white text-[14.5px] font-semibold transition-colors">
+        <Plus size={17} /> New chat
+      </button>
+
+      <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-slate-500 mt-7 mb-2">Try asking</p>
+      <div className="space-y-1">
+        {SUGGESTIONS.map((s) => (
+          <button key={s.title} onClick={() => { pickPrompt(s.prompt); setSidebarOpen(false); }}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[14px] text-slate-700 hover:bg-slate-100 transition-colors">
+            <s.Icon size={17} className="text-sky-600 shrink-0" /> {s.title}
+          </button>
+        ))}
+      </div>
+
+      <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-slate-500 mt-7 mb-2">Tools</p>
+      <div className="space-y-1">
+        {tools.map((tool) => {
+          const Icon = TOOL_ICON[tool.icon] ?? Sparkles;
+          return (
+            <button key={tool.id} onClick={() => toggleTool(tool.id)} role="switch" aria-checked={tool.enabled}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[14px] text-slate-700 hover:bg-slate-100 transition-colors">
+              <Icon size={17} className={tool.enabled ? "text-sky-600" : "text-slate-400"} />
+              <span className="flex-1">{tool.name}</span>
+              <span className={`w-9 h-5 rounded-full p-0.5 transition-colors ${tool.enabled ? "bg-sky-500" : "bg-slate-200"}`}>
+                <span className={`block w-4 h-4 rounded-full bg-white shadow transition-transform ${tool.enabled ? "translate-x-4" : ""}`} />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-slate-500 mt-7 mb-2">Voice</p>
+      <button onClick={toggleAutoSpeak} role="switch" aria-checked={autoSpeak}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[14px] text-slate-700 hover:bg-slate-100 transition-colors">
+        {autoSpeak ? <Volume2 size={17} className="text-sky-600" /> : <VolumeX size={17} className="text-slate-400" />}
+        <span className="flex-1">Read stories aloud</span>
+        <span className={`w-9 h-5 rounded-full p-0.5 transition-colors ${autoSpeak ? "bg-sky-500" : "bg-slate-200"}`}>
+          <span className={`block w-4 h-4 rounded-full bg-white shadow transition-transform ${autoSpeak ? "translate-x-4" : ""}`} />
+        </span>
+      </button>
+      {availableVoices.length > 0 && (
+        <select
+          value={selectedVoice?.name ?? ""}
+          onChange={(e) => setSelectedVoice(availableVoices.find((v) => v.name === e.target.value) ?? null)}
+          className="mt-2 w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-[13.5px] text-slate-700 focus:outline-none focus:border-sky-500"
+          aria-label="Voice"
+        >
+          {availableVoices.filter((v) => v.lang.startsWith("en")).slice(0, 30).map((v) => <option key={v.name} value={v.name}>{v.name}</option>)}
+        </select>
+      )}
+
+      {providerStatus && (
+        <p className="mt-auto pt-6 text-[12px] text-slate-400 flex items-center gap-1.5">
+          <span className={`w-2 h-2 rounded-full ${providerStatus.configured[providerStatus.activeProvider] ? "bg-emerald-500" : "bg-amber-500"}`} />
+          {providerStatus.configured[providerStatus.activeProvider] ? "AI connected" : "AI running in offline mode"}
+        </p>
+      )}
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-on-background text-surface-container-lowest font-body antialiased">
-      <Head>
-        <title>Agent SIHU | Environmental AI</title>
-        <link
-          href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined"
-          rel="stylesheet"
-        />
-      </Head>
+    <div className="bg-[#f6f8fb] text-slate-900">
+      <NewsHeader />
+      {/* The chat fills the screen under the header, like a messaging app (no site footer here). */}
+      <style>{`.site-footer{display:none}`}</style>
+      <div className="fixed inset-x-0 bottom-0 top-[72px] z-40 flex bg-[#f6f8fb]">
+        {/* Sidebar: desktop */}
+        <aside className="hidden lg:flex w-[290px] shrink-0 flex-col bg-white border-r border-slate-200 p-5 overflow-y-auto">{sidebar}</aside>
 
-      {/* TopAppBar */}
-      <header className="fixed top-0 w-full z-50 bg-slate-950/95 backdrop-blur-xl border-b border-white/10 px-4 md:px-6 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-full bg-slate-800/70 text-slate-200 hover:bg-slate-700 transition-colors"
-            aria-label="Open agent navigation"
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-          <Image
-            src="/images/logo-main.png"
-            alt="SIHU Logo"
-            width={140}
-            height={40}
-            className="object-contain h-9 w-auto bg-white rounded-lg px-1.5 py-1"
-            priority
-          />
-          <h1 className="text-lg md:text-xl font-bold text-white tracking-tight">
-            Agent SIHU
-          </h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex gap-6 mr-6">
-            <a
-              className="text-slate-300 hover:text-white transition-colors text-[14px] font-semibold"
-              href="/"
-            >
-              Home
-            </a>
-            <a
-              className="text-slate-300 hover:text-white transition-colors text-[14px] font-semibold"
-              href="/portal"
-            >
-              News
-            </a>
-            <a
-              className="text-sky-300 transition-colors text-[14px] font-semibold"
-              href="/ai"
-            >
-              Agent SIHU
-            </a>
-            <a
-              className="text-slate-300 hover:text-white transition-colors text-[14px] font-semibold"
-              href="/dapp"
-            >
-              DApp
-            </a>
-          </div>
-          {/* Mobile Menu Toggle */}
-          <button
-            className="md:hidden p-2 text-slate-400"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {mobileMenuOpen ? (
-                <>
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </>
-              ) : (
-                <>
-                  <line x1="3" y1="12" x2="21" y2="12"></line>
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <line x1="3" y1="18" x2="21" y2="18"></line>
-                </>
-              )}
-            </svg>
-          </button>
-          <button className="hidden md:block material-symbols-outlined text-slate-400 hover:bg-sky-900/30 p-2 rounded-full transition-colors active:scale-95">
-            settings_ethernet
-          </button>
-        </div>
-      </header>
-
-      {/* Agent SIHU Sidebar */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-      <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-slate-950/95 border-r border-white/10 z-50 transform transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
-          <div>
-            <p className="text-slate-300 uppercase tracking-[0.3em] text-xs">
-              Agent SIHU
-            </p>
-            <h2 className="text-xl font-semibold text-white">Quick Actions</h2>
-          </div>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="p-2 rounded-full bg-slate-800 text-slate-300 hover:text-white transition-colors"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <div className="px-6 py-5 space-y-3">
-          {[
-            { label: "Projects", icon: "folder_open" },
-            { label: "Artifacts", icon: "inventory_2" },
-            { label: "Chats", icon: "chat" },
-            { label: "Customize", icon: "tune" },
-            { label: "Imagine", icon: "auto_fix_high" },
-            { label: "Voice", icon: "voice_chat" },
-          ].map((item) => (
-            <button
-              key={item.label}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/5 text-slate-200 hover:bg-slate-800/90 transition-colors"
-              onClick={() => {
-                setSidebarOpen(false);
-                console.log(`${item.label} clicked`);
-              }}
-            >
-              <span className="material-symbols-outlined text-sky-300">
-                {item.icon}
-              </span>
-              <span className="text-sm font-semibold">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </aside>
-
-      {/* Mobile Nav Overlay */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-4 top-20 glass-premium p-6 rounded-2xl shadow-2xl animate-fade-in z-50 border border-white/20">
-          <div className="flex flex-col gap-6 font-bold text-center text-slate-900 dark:text-white uppercase tracking-widest text-sm">
-            <a
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className="hover:text-primary transition-colors"
-            >
-              Home
-            </a>
-            <a
-              href="/portal"
-              onClick={() => setMobileMenuOpen(false)}
-              className="hover:text-primary transition-colors"
-            >
-              News
-            </a>
-            <a
-              href="/ai"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-primary"
-            >
-              Agent SIHU
-            </a>
-            <a
-              href="/dapp"
-              onClick={() => setMobileMenuOpen(false)}
-              className="hover:text-primary transition-colors"
-            >
-              DApp
-            </a>
-          </div>
-        </div>
-      )}
-
-      <main
-        className={`pt-20 md:pt-24 px-4 md:px-12 max-w-7xl mx-auto min-h-screen flex flex-col transition-all duration-300 ${
-          keyboardVisible ? "pb-4" : "pb-32 md:pb-40"
-        }`}
-        style={{
-          paddingBottom: keyboardVisible ? "env(safe-area-inset-bottom, 0px)" : undefined,
-        }}
-      >
-        {/* Header */}
-        <div className="mb-6 md:mb-8">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-headline font-extrabold text-white mb-2 tracking-tighter">
-            Agent SIHU
-          </h2>
-          <div className="flex items-center gap-2 text-sky-400/80 font-medium">
-            <span className="material-symbols-outlined text-sm">verified</span>
-            <span className="text-sm md:text-base">
-              Environmental Intelligence Protocol Active
-            </span>
-          </div>
-          {providerStatus && (
-            <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300">
-              <span className="font-semibold uppercase tracking-wider text-sky-300">
-                Active AI:
-              </span>
-              <span>{providerStatus.activeProvider}</span>
-              <span className="text-slate-500">/</span>
-              <span>{providerStatus.models[providerStatus.activeProvider]}</span>
-              {!providerStatus.configured[providerStatus.activeProvider] && (
-                <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-300">
-                  fallback mode
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Tools Panel */}
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2 md:gap-3 items-center">
-            {tools.map((tool) => (
-              <button
-                key={tool.id}
-                onClick={() => toggleTool(tool.id)}
-                className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-full text-xs font-bold transition-all ${
-                  tool.enabled
-                    ? "bg-sky-600/20 border border-sky-400/30 text-sky-300"
-                    : "bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10"
-                }`}
-              >
-                <span className="material-symbols-outlined text-sm">
-                  {tool.icon}
-                </span>
-                {tool.name}
-              </button>
-            ))}
-
-            {/* Auto-speak toggle */}
-            <button
-              onClick={toggleAutoSpeak}
-              className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-full text-xs font-bold transition-all ml-2 ${
-                autoSpeak
-                  ? "bg-emerald-600/20 border border-emerald-400/30 text-emerald-300"
-                  : "bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10"
-              }`}
-              title="Auto-speak stories"
-            >
-              <span className="material-symbols-outlined text-sm">
-                {autoSpeak ? "volume_up" : "volume_off"}
-              </span>
-              Auto-Speak
-            </button>
-          </div>
-        </div>
-
-        {/* Chat Container */}
-        <div className="flex-grow flex flex-col bg-slate-900/30 rounded-2xl border border-white/5 overflow-hidden">
-          {/* Messages */}
-          <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-6">
-            {messages.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-sky-900/30 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-3xl text-sky-400">
-                    auto_stories
-                  </span>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  Welcome to Agent SIHU
-                </h3>
-                <p className="text-slate-400 max-w-md mx-auto mb-6">
-                  I am your storyteller for the Lake Victoria Basin ecosystem.
-                  Ask me about Sango, basin health, or stewardship stories.
-                </p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  <button
-                    onClick={() =>
-                      setInputValue("Tell me a story about the Sango project")
-                    }
-                    className="bg-white/5 hover:bg-white/10 border border-white/5 px-4 py-2 rounded-full text-sm text-sky-200 transition-colors"
-                  >
-                    Tell me a Sango story
-                  </button>
-                  <button
-                    onClick={() =>
-                      setInputValue("What is basin health mining?")
-                    }
-                    className="bg-white/5 hover:bg-white/10 border border-white/5 px-4 py-2 rounded-full text-sm text-sky-200 transition-colors"
-                  >
-                    What is basin health mining?
-                  </button>
-                </div>
+        {/* Sidebar: phone drawer */}
+        {sidebarOpen && (
+          <div className="lg:hidden fixed inset-0 z-[60] bg-slate-900/40" onClick={() => setSidebarOpen(false)}>
+            <aside className="absolute left-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-white p-5 pt-6 overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-5">
+                <p className="font-heading font-bold text-[18px]">Agent SIHU</p>
+                <button onClick={() => setSidebarOpen(false)} aria-label="Close" className="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center"><X size={19} /></button>
               </div>
+              {sidebar}
+            </aside>
+          </div>
+        )}
+
+        {/* Chat */}
+        <main className="flex-1 min-w-0 flex flex-col">
+          <div className="flex items-center gap-3 px-4 md:px-6 h-14 border-b border-slate-200 bg-white/80 backdrop-blur shrink-0">
+            <button onClick={() => setSidebarOpen(true)} aria-label="Open menu" className="lg:hidden w-10 h-10 -ml-2 rounded-full hover:bg-slate-100 flex items-center justify-center"><PanelLeft size={19} /></button>
+            <span className="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center"><Bot size={17} /></span>
+            <div className="min-w-0">
+              <p className="font-bold text-[15px] leading-tight">Agent SIHU</p>
+              <p className="text-[12px] text-slate-500 leading-tight">Storyteller for the Lake Victoria Basin</p>
+            </div>
+            {messages.length > 0 && (
+              <button onClick={newChat} className="ml-auto inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-[13px] font-semibold text-slate-600 hover:bg-slate-100"><Plus size={15} /> New chat</button>
             )}
+          </div>
 
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex items-start gap-3 md:gap-4 ${
-                  message.role === "user" ? "justify-end" : ""
-                }`}
-              >
-                {message.role === "assistant" && (
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-                    <span className="material-symbols-outlined text-white text-lg md:text-xl">
-                      smart_toy
-                    </span>
-                  </div>
-                )}
-                <div
-                  className={`flex flex-col gap-2 max-w-[80%] ${
-                    message.role === "user" ? "items-end" : "items-start"
-                  }`}
-                >
-                  {message.attachments && message.attachments.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {message.attachments.map((file, index) => (
-                        <div
-                          key={index}
-                          className="bg-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 flex items-center gap-2"
-                        >
-                          <span className="material-symbols-outlined text-sm">
-                            attach_file
-                          </span>
-                          {file.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <div
-                    className={`rounded-2xl p-4 text-sm md:text-base ${
-                      message.role === "user"
-                        ? "bg-sky-600 text-white"
-                        : "bg-slate-800/50 text-slate-100 border border-white/5"
-                    }`}
-                  >
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: message.content.replace(
-                          /\*\*(.*?)\*\*/g,
-                          "<strong>$1</strong>"
-                        ),
-                      }}
-                    />
-                  </div>
-
-                  {/* Speak button for assistant messages */}
-                  {message.role === "assistant" && message.speechText && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <button
-                        onClick={() => {
-                          if (
-                            isSpeaking &&
-                            speakingMessageId === message.id
-                          ) {
-                            stopSpeaking();
-                          } else {
-                            speakMessage(message.speechText!, message.id);
-                          }
-                        }}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                          isSpeaking && speakingMessageId === message.id
-                            ? "bg-sky-500/30 text-sky-300 animate-pulse"
-                            : "bg-white/10 text-slate-400 hover:bg-white/20 hover:text-sky-300"
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-sm">
-                          {isSpeaking && speakingMessageId === message.id
-                            ? "volume_off"
-                            : "volume_up"}
+          <div ref={chatScrollRef} className="flex-1 overflow-y-auto">
+            <div className="max-w-3xl mx-auto px-4 md:px-6 py-8 space-y-6">
+              {messages.length === 0 && (
+                <div className="text-center pt-6 md:pt-14">
+                  <span className="mx-auto w-16 h-16 rounded-2xl bg-sky-600 text-white flex items-center justify-center shadow-lg shadow-sky-600/25"><Bot size={30} /></span>
+                  <h1 className="font-heading text-[30px] md:text-[38px] font-bold mt-6 leading-tight">How can I help you today?</h1>
+                  <p className="text-[16px] text-slate-600 mt-3 max-w-lg mx-auto leading-relaxed">
+                    I am Agent SIHU, the storyteller for the Lake Victoria Basin. Ask me about Sango, the health of the lake, rewards or the latest news.
+                  </p>
+                  <div className="grid sm:grid-cols-2 gap-3 mt-9 text-left">
+                    {SUGGESTIONS.map((s) => (
+                      <button key={s.title} onClick={() => pickPrompt(s.prompt)}
+                        className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 text-left hover:border-sky-300 hover:shadow-[0_12px_28px_-16px_rgba(2,132,199,0.5)] transition-all">
+                        <span className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center shrink-0 group-hover:bg-sky-600 group-hover:text-white transition-colors"><s.Icon size={19} /></span>
+                        <span>
+                          <span className="block font-semibold text-[15px]">{s.title}</span>
+                          <span className="block text-[13px] text-slate-500 mt-0.5 line-clamp-2">{s.prompt}</span>
                         </span>
-                        {isSpeaking && speakingMessageId === message.id
-                          ? "Stop"
-                          : "Listen"}
                       </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                      {message.isStory && (
-                        <span className="text-[10px] text-sky-400/70 uppercase tracking-wider font-medium">
-                          Story Mode
-                        </span>
+              {messages.map((message) => {
+                const mine = message.role === "user";
+                const speaking = isSpeaking && speakingMessageId === message.id;
+                return (
+                  <div key={message.id} className={`flex items-start gap-3 ${mine ? "justify-end" : ""}`}>
+                    {!mine && <span className="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0 mt-1"><Bot size={16} /></span>}
+                    <div className={`flex flex-col gap-1.5 max-w-[85%] md:max-w-[78%] ${mine ? "items-end" : "items-start"}`}>
+                      {message.attachments && message.attachments.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {message.attachments.map((file, index) => (
+                            <span key={index} className="inline-flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[12.5px] text-slate-600"><Paperclip size={13} /> {file.name}</span>
+                          ))}
+                        </div>
                       )}
+                      <div className={`rounded-2xl px-4 py-3 text-[15px] leading-relaxed whitespace-pre-wrap ${mine ? "bg-slate-900 text-white rounded-tr-md" : "bg-white text-slate-800 border border-slate-200 rounded-tl-md"}`}>
+                        <RichText text={message.content} />
+                      </div>
+                      <div className="flex items-center gap-2 text-[12px] text-slate-400">
+                        {!mine && message.speechText && (
+                          <button onClick={() => (speaking ? stopSpeaking() : speakMessage(message.speechText!, message.id))}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-semibold transition-colors ${speaking ? "bg-sky-100 text-sky-700" : "text-slate-500 hover:bg-slate-100"}`}>
+                            {speaking ? <><Square size={12} /> Stop</> : <><Volume2 size={13} /> Listen</>}
+                          </button>
+                        )}
+                        {!mine && message.isStory && <span className="inline-flex items-center gap-1 text-sky-700 font-semibold"><BookOpen size={12} /> Story</span>}
+                        <span>{mounted ? message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "\u00A0"}</span>
+                      </div>
                     </div>
-                  )}
-
-                  <span className="text-xs text-slate-500">
-                    {mounted
-                      ? message.timestamp.toLocaleTimeString()
-                      : "\u00A0"}
-                  </span>
-                </div>
-                {message.role === "user" && (
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-slate-800 flex items-center justify-center shrink-0 overflow-hidden">
-                    <span className="material-symbols-outlined text-slate-400">
-                      person
-                    </span>
+                    {mine && <span className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center shrink-0 mt-1"><User size={16} /></span>}
                   </div>
-                )}
-              </div>
-            ))}
+                );
+              })}
 
-            {isTyping && (
-              <div className="flex items-start gap-3 md:gap-4">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-                  <span className="material-symbols-outlined text-white text-lg md:text-xl">
-                    smart_toy
-                  </span>
-                </div>
-                <div className="bg-slate-800/50 rounded-2xl p-4 border border-white/5">
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-sky-400 rounded-full animate-bounce"></div>
-                      <div
-                        className="w-2 h-2 bg-sky-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.1s" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-sky-400 rounded-full animate-bounce"
-                        style={{ animationDelay: "0.2s" }}
-                      ></div>
-                    </div>
-                    <span className="text-slate-400 text-sm">
-                      Agent SIHU is thinking...
-                    </span>
+              {isTyping && (
+                <div className="flex items-start gap-3">
+                  <span className="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0"><Bot size={16} /></span>
+                  <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-md px-4 py-3.5 flex items-center gap-1.5" aria-label="Agent SIHU is typing">
+                    {[0, 1, 2].map((d) => <span key={d} className="w-2 h-2 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: `${d * 0.15}s` }} />)}
                   </div>
                 </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
+              )}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
 
-          {/* Attachments Preview */}
-          {attachments.length > 0 && (
-            <div className="px-4 md:px-6 pb-4 border-t border-white/5">
-              <div className="flex flex-wrap gap-2 mt-4">
-                {attachments.map((file, index) => (
-                  <div
-                    key={index}
-                    className="bg-slate-800 rounded-lg px-3 py-2 text-xs text-slate-300 flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-sm">
-                      attach_file
+          {/* Composer */}
+          <div className="shrink-0 border-t border-slate-200 bg-white px-3 md:px-6 pt-3" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))" }}>
+            <div className="max-w-3xl mx-auto">
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {attachments.map((file, index) => (
+                    <span key={index} className="inline-flex items-center gap-1.5 bg-slate-100 rounded-lg pl-3 pr-1 py-1 text-[12.5px] text-slate-700">
+                      <Paperclip size={13} /> {file.name}
+                      <button onClick={() => removeAttachment(index)} aria-label={`Remove ${file.name}`} className="w-6 h-6 rounded-md hover:bg-slate-200 flex items-center justify-center"><X size={13} /></button>
                     </span>
-                    {file.name}
-                    <button
-                      onClick={() => removeAttachment(index)}
-                      className="text-slate-500 hover:text-red-400 ml-1"
-                    >
-                      <span className="material-symbols-outlined text-sm">
-                        close
-                      </span>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Input Area - Mobile Optimized */}
-          <div
-            className={`p-3 md:p-6 border-t border-white/5 bg-slate-950/95 backdrop-blur-xl ${
-              keyboardVisible ? "fixed bottom-0 left-0 right-0 z-50" : ""
-            }`}
-            style={{
-              paddingBottom: keyboardVisible ? "max(12px, env(safe-area-inset-bottom, 12px))" : undefined,
-            }}
-          >
-            <div className="flex items-end gap-2 md:gap-3 max-w-7xl mx-auto">
-              {/* File Upload - Touch optimized */}
-              <button
-                onClick={() => {
-                  hapticFeedback();
-                  fileInputRef.current?.click();
-                }}
-                className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center text-slate-400 hover:text-sky-300 transition-colors rounded-full hover:bg-white/5 active:scale-95"
-                title="Upload files"
-                aria-label="Upload files"
-              >
-                <span className="material-symbols-outlined text-xl">attach_file</span>
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                onChange={handleFileUpload}
-                className="hidden"
-                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.xlsx"
-              />
-
-              {/* Text Input - Mobile optimized */}
-              <div className="flex-grow relative">
+                  ))}
+                </div>
+              )}
+              <div className="flex items-end gap-2 rounded-3xl border border-slate-300 bg-white px-2 py-2 focus-within:border-sky-500 focus-within:ring-4 focus-within:ring-sky-500/15 transition-shadow">
+                <button onClick={() => fileInputRef.current?.click()} aria-label="Attach a file" className="w-10 h-10 shrink-0 rounded-full text-slate-500 hover:bg-slate-100 flex items-center justify-center"><Paperclip size={19} /></button>
+                <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileUpload} />
                 <textarea
                   ref={textareaRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && !isMobile) {
-                      e.preventDefault();
-                      hapticFeedback();
-                      sendMessage();
-                    }
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(); }
                   }}
-                  onFocus={() => isMobile && setKeyboardVisible(true)}
-                  onBlur={() => isMobile && setTimeout(() => setKeyboardVisible(false), 200)}
-                  placeholder={isMobile ? "Ask about the Basin..." : "Ask Agent SIHU anything about the ecosystem..."}
-                  className="w-full bg-slate-800/50 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none min-h-[44px] max-h-32 text-base"
                   rows={1}
-                  style={{ fontSize: "16px" }} // Prevent zoom on iOS
+                  placeholder="Message Agent SIHU"
+                  className="flex-1 min-w-0 resize-none bg-transparent py-2.5 px-1 text-[15px] leading-relaxed placeholder:text-slate-400 focus:outline-none max-h-40"
+                  style={{ height: "auto" }}
+                  onInput={(e) => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = `${Math.min(t.scrollHeight, 160)}px`; }}
                 />
-              </div>
-
-              {/* Voice Input - Touch optimized */}
-              <button
-                onClick={() => {
-                  hapticFeedback();
-                  isRecording ? stopRecording() : startRecording();
-                }}
-                className={`min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full transition-all active:scale-95 ${
-                  isRecording
-                    ? "bg-red-600 text-white animate-pulse"
-                    : "text-slate-400 hover:text-sky-300 hover:bg-white/5"
-                }`}
-                title={isRecording ? "Stop recording" : "Voice input"}
-                aria-label={isRecording ? "Stop recording" : "Voice input"}
-              >
-                <span className="material-symbols-outlined text-xl">
-                  {isRecording ? "stop" : "mic"}
-                </span>
-              </button>
-
-              {/* Send Button - Touch optimized */}
-              <button
-                onClick={() => {
-                  hapticFeedback();
-                  sendMessage();
-                }}
-                disabled={!inputValue.trim() && attachments.length === 0}
-                className="min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center bg-primary hover:bg-primary-container disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-full transition-all active:scale-90 shadow-lg shadow-primary/20"
-                title="Send message"
-                aria-label="Send message"
-              >
-                <span className="material-symbols-outlined text-xl">send</span>
-              </button>
-            </div>
-
-            {/* Quick Actions - Mobile Optimized */}
-            <div className={`flex gap-2 mt-3 overflow-x-auto scrollbar-hide ${keyboardVisible ? "hidden" : "flex"}`}>
-              {[
-                { label: "Story Time", prompt: "Tell me a story about Sango and the Basin" },
-                { label: "Basin Health", prompt: "What is basin health mining?" },
-                { label: "Rewards", prompt: "Show me my mining rewards" },
-                { label: "News", prompt: "Latest news and updates" },
-              ].map((action) => (
-                <button
-                  key={action.label}
-                  onClick={() => {
-                    hapticFeedback();
-                    setInputValue(action.prompt);
-                    textareaRef.current?.focus();
-                  }}
-                  className="shrink-0 min-h-[32px] bg-white/5 hover:bg-white/10 border border-white/5 px-3 py-1.5 rounded-full text-xs font-bold text-sky-200 transition-colors active:scale-95 whitespace-nowrap"
-                >
-                  {action.label}
+                <button onClick={() => (isRecording ? stopRecording() : startRecording())} aria-label={isRecording ? "Stop voice input" : "Speak your question"}
+                  className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center transition-colors ${isRecording ? "bg-rose-600 text-white animate-pulse" : "text-slate-500 hover:bg-slate-100"}`}>
+                  {isRecording ? <MicOff size={19} /> : <Mic size={19} />}
                 </button>
-              ))}
+                <button onClick={() => { hapticFeedback(); void sendMessage(); }} disabled={!inputValue.trim() && attachments.length === 0}
+                  aria-label="Send message" className="w-10 h-10 shrink-0 rounded-full bg-sky-600 hover:bg-sky-500 disabled:bg-slate-200 disabled:text-slate-400 text-white flex items-center justify-center transition-colors">
+                  <Send size={17} />
+                </button>
+              </div>
+              <p className={`text-center text-[12px] text-slate-400 mt-2 ${keyboardVisible ? "hidden" : ""}`}>
+                Agent SIHU can make mistakes. Check important facts in the <Link href="/portal" className="underline hover:text-slate-600">news</Link>.
+              </p>
             </div>
           </div>
-        </div>
-      </main>
-
-      {/* BottomNavBar (Mobile) - With safe area support */}
-      <nav
-        className={`md:hidden fixed left-0 w-full flex justify-around items-center px-4 pb-4 pt-3 bg-on-background/90 backdrop-blur-xl z-40 rounded-t-[2rem] transition-transform duration-300 ${
-          keyboardVisible ? "translate-y-full" : "translate-y-0"
-        }`}
-        style={{
-          bottom: 0,
-          paddingBottom: "max(16px, env(safe-area-inset-bottom, 16px))",
-        }}
-      >
-        <a
-          className="flex flex-col items-center justify-center text-slate-500 min-w-[64px] py-2 active:scale-95 transition-transform"
-          href="/"
-        >
-          <span className="material-symbols-outlined text-2xl">home</span>
-          <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-wider mt-0.5">
-            Home
-          </span>
-        </a>
-        <a
-          className="flex flex-col items-center justify-center text-slate-500 min-w-[64px] py-2 active:scale-95 transition-transform"
-          href="/portal"
-        >
-          <span className="material-symbols-outlined text-2xl">newspaper</span>
-          <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-wider mt-0.5">
-            News
-          </span>
-        </a>
-        <a
-          className="flex flex-col items-center justify-center bg-sky-900/40 text-sky-200 rounded-2xl min-w-[64px] py-2 active:scale-95 transition-transform"
-          href="/ai"
-        >
-          <span className="material-symbols-outlined text-2xl">smart_toy</span>
-          <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-wider mt-0.5">
-            SIHU
-          </span>
-        </a>
-        <a
-          className="flex flex-col items-center justify-center text-slate-500 min-w-[64px] py-2 active:scale-95 transition-transform"
-          href="/dapp"
-        >
-          <span className="material-symbols-outlined text-2xl">dashboard_customize</span>
-          <span className="font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-wider mt-0.5">
-            DApp
-          </span>
-        </a>
-      </nav>
+        </main>
+      </div>
     </div>
   );
 }

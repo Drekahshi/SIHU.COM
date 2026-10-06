@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react";
 import { useSihuStore } from "@/store/useSihuStore";
 import WalletConnectModal from "@/components/dapp/WalletConnectModal";
-import { Pickaxe, Zap, Gift, CheckCircle, Clock, Users, UserPlus, Cpu, Rocket } from "lucide-react";
+import { Pickaxe, Zap, Gift, CheckCircle, Clock, Users, UserPlus, Cpu, Rocket, PartyPopper, Ticket } from "lucide-react";
 import "../dapp.css";
 
 const WHITELIST = [
-  { name: "SIHU Early Birds", spots: "247 / 500",  badge: "🔥 Hot",    status: "open",   reward: "500 SIHU" },
-  { name: "USDT Liquidity",   spots: "89 / 200",   badge: "✨ Early",  status: "open",   reward: "1,000 USDT" },
+  { name: "SIHU Early Birds", spots: "247 / 500",  badge: "Hot",    status: "open",   reward: "500 SIHU" },
+  { name: "USDT Liquidity",   spots: "89 / 200",   badge: "Early",  status: "open",   reward: "1,000 USDT" },
   { name: "Governance DAO",   spots: "500 / 500",  badge: "⏰ Closed", status: "closed", reward: "200 SANGO" },
 ];
 
@@ -73,7 +73,7 @@ export default function MinePage() {
 
         {!claimed ? (
           <button onClick={claim} className="btn-blue w-full py-4 text-sm font-black uppercase tracking-widest shadow-blue-500/20">
-            🎁 Claim Daily SIHU
+            <Gift size={16} className="inline -mt-0.5 mr-1.5" /> Claim daily SIHU
           </button>
         ) : (
           <div className="flex items-center gap-4 bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-2xl">
@@ -166,7 +166,7 @@ export default function MinePage() {
           </div>
         ) : (
           <div className="text-center py-4 bg-emerald-500/5 border border-emerald-500/20 rounded-3xl">
-            <div className="text-4xl mb-3">🎉</div>
+            <div className="mb-3 flex justify-center"><PartyPopper size={38} className="text-sky-300" /></div>
             <p className="text-sm font-black text-emerald-400 uppercase">ASSET DEPLOYED!</p>
             <p className="text-[9px] text-white/30 font-black uppercase mt-4 mb-1">Token Identifier:</p>
             <p className="font-mono text-base font-black text-blue-400 mb-6 bg-black/20 px-4 py-2 rounded-full inline-block">
@@ -190,14 +190,14 @@ export default function MinePage() {
         <div className="flex flex-col gap-3">
           {WHITELIST.map((w, i) => (
             <div key={i} className="glass p-4 border-white/5 hover:border-blue-500/20 transition-all flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-2xl border border-blue-500/20">🎫</div>
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-sky-300 border border-blue-500/20"><Ticket size={22} /></div>
               <div className="flex-1">
                 <p className="text-sm font-black text-white uppercase tracking-tight leading-none mb-1">{w.name}</p>
                 <div className="flex gap-4 items-center">
                   <span className="text-[9px] font-black text-white/30 uppercase flex items-center gap-1">
                     <Users size={10} /> {w.spots}
                   </span>
-                  <span className="text-[9px] font-black text-emerald-400 uppercase">🎁 {w.reward}</span>
+                  <span className="text-[9px] font-black text-emerald-400 uppercase"><Gift size={11} className="inline -mt-0.5 mr-1" />{w.reward}</span>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2">

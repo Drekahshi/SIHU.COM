@@ -97,7 +97,7 @@ export default function EditorReviewModal({
               <span>Author: <strong className="text-neutral-200">{article.authorName}</strong></span>
               <span>•</span>
               <span className="text-amber-400">{article.authorRole}</span>
-              {article.authorVerifiedBadge && <span className="text-emerald-400 font-semibold">✓ Verified</span>}
+              {article.authorVerifiedBadge && <span className="text-emerald-400 font-semibold">Verified</span>}
             </div>
           </div>
           <button

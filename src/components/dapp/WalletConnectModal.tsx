@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { X, Shield, KeyRound, CheckCircle2, Copy } from "lucide-react";
+import { X, Shield, KeyRound, CheckCircle2, Copy, Rocket, Lock } from "lucide-react";
 import { useSihuStore } from "@/store/useSihuStore";
 import { generateTestnetWallet } from "@/services/hederaService";
 
@@ -67,7 +67,7 @@ export default function WalletConnectModal({ onClose }: { onClose: () => void })
               className="flex items-center gap-5 p-5 rounded-2xl transition-all group hover:bg-white/5 border border-white/5 hover:border-emerald-500/50"
               style={{ background: "rgba(16, 185, 129, 0.05)" }}>
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg"
-                   style={{ background: "linear-gradient(135deg, #10B981, #34D399)" }}>🚀</div>
+                   style={{ background: "#10B981" }}><Rocket size={24} className="text-white" /></div>
               <div className="text-left flex-1">
                 <p className="font-bold text-white text-lg">Create Native Wallet</p>
                 <p className="text-sm text-emerald-400/50">Generate a new ED25519 Keypair</p>
@@ -80,7 +80,7 @@ export default function WalletConnectModal({ onClose }: { onClose: () => void })
               className="flex items-center gap-5 p-5 rounded-2xl transition-all group hover:bg-white/5 border border-white/5 hover:border-blue-500/50"
               style={{ background: "rgba(59, 130, 246, 0.05)" }}>
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg"
-                   style={{ background: "linear-gradient(135deg, #3B82F6, #60A5FA)" }}>🔑</div>
+                   style={{ background: "#3B82F6" }}><KeyRound size={24} className="text-white" /></div>
               <div className="text-left flex-1">
                 <p className="font-bold text-white text-lg">Import Testnet Account</p>
                 <p className="text-sm text-blue-400/50">Use existing Account ID & Priv Key</p>
@@ -139,7 +139,7 @@ export default function WalletConnectModal({ onClose }: { onClose: () => void })
             <div className="relative">
               <div className="w-20 h-20 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin" />
               <div className="absolute inset-0 flex items-center justify-center text-2xl animate-pulse">
-                🔐
+                <Lock size={26} />
               </div>
             </div>
             <div className="text-center">
@@ -175,7 +175,7 @@ export default function WalletConnectModal({ onClose }: { onClose: () => void })
                     {privateKey}
                   </p>
                   <p className="text-[9px] text-red-400/80 font-bold uppercase mt-2 text-center">
-                    ⚠️ Copy this key! It will not be shown again.
+                    Copy this key now. It will not be shown again.
                   </p>
                 </div>
               )}

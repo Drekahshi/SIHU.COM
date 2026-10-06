@@ -11,10 +11,10 @@ const BUBBLES = [
 ];
 
 const SIHU_VAULTS = [
-  { name:"SIHU/HBAR Yield",     protocol:"Bonzo · SaucerSwap", apy:"28.4%", tvl:"$480K",  risk:"Low",    badge:"🤖 AI Managed" },
-  { name:"HBAR Native Vault",   protocol:"Bonzo · Hedera",     apy:"22.1%", tvl:"$320K",  risk:"Low",    badge:"🛡️ Protected"  },
-  { name:"SIHU Stable Bond",    protocol:"SIHU Network",       apy:"18.9%", tvl:"$280K",  risk:"Medium", badge:"🔒 Verified"   },
-  { name:"USDT Liquid Reserve", protocol:"Bonzo · RWA",        apy:"12.0%", tvl:"$140K",  risk:"Low",    badge:"🛡️ Protected"  },
+  { name:"SIHU/HBAR Yield",     protocol:"Bonzo · SaucerSwap", apy:"28.4%", tvl:"$480K",  risk:"Low",    badge:"AI managed" },
+  { name:"HBAR Native Vault",   protocol:"Bonzo · Hedera",     apy:"22.1%", tvl:"$320K",  risk:"Low",    badge:"Protected"  },
+  { name:"SIHU Stable Bond",    protocol:"SIHU Network",       apy:"18.9%", tvl:"$280K",  risk:"Medium", badge:"Verified"   },
+  { name:"USDT Liquid Reserve", protocol:"Bonzo · RWA",        apy:"12.0%", tvl:"$140K",  risk:"Low",    badge:"Protected"  },
 ];
 
 export default function VaultsPage() {
@@ -90,7 +90,7 @@ export default function VaultsPage() {
             flex-1 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all
             ${view === v ? "bg-blue-600 text-white shadow-lg" : "text-white/20 hover:text-white/40"}
           `}>
-            {v === "bubbles" ? "🫧 Network Graph" : "📋 List View"}
+            {v === "bubbles" ? "Network graph" : "List view"}
           </button>
         ))}
       </div>

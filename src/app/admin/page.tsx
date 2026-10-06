@@ -591,7 +591,7 @@ export default function AdminDashboard() {
                     <p className="text-[10px] text-slate-400">GPT‑4o, GPT‑4 Turbo</p>
                   </div>
                   {activeProvider === "openai" && <span className="text-[9px] font-black uppercase tracking-widest text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">Active</span>}
-                  {savedKeys.openai && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Saved ✓</span>}
+                  {savedKeys.openai && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Saved</span>}
                 </div>
                 <button type="button" onClick={() => setActiveProvider("openai")} className={`w-full rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${activeProvider === "openai" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
                   Use OpenAI in Agent SIHU
@@ -628,7 +628,7 @@ export default function AdminDashboard() {
                     <p className="text-[10px] text-slate-400">Gemini 1.5 Pro, Flash</p>
                   </div>
                   {activeProvider === "gemini" && <span className="text-[9px] font-black uppercase tracking-widest text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">Active</span>}
-                  {savedKeys.gemini && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">Saved ✓</span>}
+                  {savedKeys.gemini && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">Saved</span>}
                 </div>
                 <button type="button" onClick={() => setActiveProvider("gemini")} className={`w-full rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${activeProvider === "gemini" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
                   Use Gemini in Agent SIHU
@@ -665,7 +665,7 @@ export default function AdminDashboard() {
                     <p className="text-[10px] text-slate-400">Claude 3.5 Sonnet, Opus</p>
                   </div>
                   {activeProvider === "anthropic" && <span className="text-[9px] font-black uppercase tracking-widest text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-100">Active</span>}
-                  {savedKeys.anthropic && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">Saved ✓</span>}
+                  {savedKeys.anthropic && <span className="ml-auto text-[9px] font-black uppercase tracking-widest text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">Saved</span>}
                 </div>
                 <button type="button" onClick={() => setActiveProvider("anthropic")} className={`w-full rounded-xl border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${activeProvider === "anthropic" ? "border-violet-300 bg-violet-50 text-violet-700" : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100"}`}>
                   Use Claude in Agent SIHU

@@ -13,10 +13,10 @@ export async function GET() {
       .limit(1);
 
     const connectionStatus = {
-      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Configured' : '❌ Missing',
-      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Configured' : '❌ Missing',
-      connection: userError && userError.message !== 'Auth session missing!' ? '❌ Failed' : '✅ Working',
-      database: articlesError ? '⚠️ Tables not created yet' : '✅ Ready',
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Configured' : 'Missing',
+      supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Configured' : 'Missing',
+      connection: userError && userError.message !== 'Auth session missing!' ? 'Failed' : 'Working',
+      database: articlesError ? 'Tables not created yet' : 'Ready',
       tables: articlesError ? null : 'Articles table accessible'
     };
 

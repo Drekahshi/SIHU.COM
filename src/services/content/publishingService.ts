@@ -22,7 +22,7 @@ const SEED_ARTICLES: PublishingArticle[] = [
 During the June-to-October dry spells, indigenous seedlings in peri-urban forests face high mortality if not protected early. Oloolua youth guardians have piloted a three-tier protection framework that increased 6-month bamboo survival rates by 38%.
 
 ### 1. Organic Mulching with Indigenous Leaves
-Layering 10cm of dry Croton and Acacia leaf litter around seedling bases cuts soil moisture loss in half. Never mulch flush against the stalk—leave a 3cm breathing gap to prevent fungal dampening.
+Layering 10cm of dry Croton and Acacia leaf litter around seedling bases cuts soil moisture loss in half. Never mulch flush against the stalk, leave a 3cm breathing gap to prevent fungal dampening.
 
 ### 2. High-Canopy Shade Nets
 Young giant bamboo (*Dendrocalamus asper*) needs 40% filtered sunlight during the first 120 days. Low-cost agro-netting woven on bamboo poles provides wind protection without trapping humidity.

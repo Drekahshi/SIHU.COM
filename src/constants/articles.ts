@@ -59,7 +59,7 @@ KPLC’s lack of transparency starkly contrasts with Canada’s IESO. While IESO
 
 Furthermore, KPLC’s electricity billing model is often convoluted, with vague explanations that attribute high prices to external factors like fluctuating oil prices or geopolitical tensions. A more transparent approach, one that breaks down the influence of debt obligations, fuel costs and operational inefficiencies on consumer billing, would not only clarify billing details but also allow citizens to understand the structural challenges the sector faces. 
 
-KPLC should openly disclose its dealings, from the prices it pays to independent power producers to the terms it offers small energy producers for selling excess electricity back to the national grid. Rural electrification should not require bribes to reach marginalized communities. Public transparency should be the standard—not something achieved only through parliamentary inquiries.`
+KPLC should openly disclose its dealings, from the prices it pays to independent power producers to the terms it offers small energy producers for selling excess electricity back to the national grid. Rural electrification should not require bribes to reach marginalized communities. Public transparency should be the standard, not something achieved only through parliamentary inquiries.`
   },
   {
     id: "blue-economy-potential",

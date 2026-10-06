@@ -7,6 +7,7 @@ import VerificationHUD from '../../components/portal/verify/VerificationHUD';
 import TaskGallery from '../../components/portal/verify/TaskGallery';
 import AnnotationTool from '../../components/portal/verify/AnnotationTool';
 import { VerifyTask } from '../../constants/verifyData';
+import { CheckCircle2, X, MousePointerClick, ScanSearch, Coins } from 'lucide-react';
 
 // Simulated Gamification State
 const INITIAL_STATE = {
@@ -80,28 +81,40 @@ export default function VerifyAndEarnPage() {
     setLastVerifyTime(Date.now());
     setSelectedTask(null); // Reset selection
     
-    setToastMessage(`🎉 Great work! Earned ${earnCredits} Credits and ${earnXp} XP.`);
+    setToastMessage(`Great work! You earned ${earnCredits} credits and ${earnXp} XP.`);
   };
 
   const currentLevelFloor = XP_LEVELS[gamState.level - 1] || 0;
   const nextLevelCeil = XP_LEVELS[gamState.level] || XP_LEVELS[XP_LEVELS.length - 1];
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#f6f8fb] flex flex-col">
       <NewsHeader />
 
       {/* Room for the fixed site header */}
-      <main className="flex-1 container mx-auto px-4 pt-[100px] pb-6 flex flex-col gap-6 max-w-7xl">
-        
-        {/* Header section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <main className="flex-1 container mx-auto px-4 lg:px-8 pt-[104px] pb-16 flex flex-col gap-6 max-w-7xl">
+
+        {/* Heading */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div>
-            <div className="text-sm font-bold text-primary uppercase tracking-widest mb-1">Impact Network</div>
-            <h1 className="text-3xl font-black text-slate-800">Verify & Earn</h1>
-            <p className="text-slate-600 mt-2 max-w-2xl">
-              Help SIHU maintain truth in environmental reporting. Verify field images to earn SIHU Credits and build your reputation.
+            <p className="text-[13px] font-bold uppercase tracking-[0.14em] text-sky-700">Impact network</p>
+            <h1 className="font-heading text-[34px] md:text-[42px] font-bold text-slate-900 leading-tight mt-2">Verify and earn</h1>
+            <p className="text-[16px] text-slate-600 mt-2 max-w-2xl leading-relaxed">
+              Help SIHU keep environmental reporting true. Check field photos from community members and earn SIHU credits for each careful check.
             </p>
           </div>
+          <ol className="grid grid-cols-3 gap-2 lg:w-[460px] shrink-0">
+            {[
+              { Icon: MousePointerClick, t: 'Choose a photo' },
+              { Icon: ScanSearch, t: 'Check it' },
+              { Icon: Coins, t: 'Earn credits' },
+            ].map((x, i) => (
+              <li key={x.t} className="bg-white rounded-2xl border border-slate-200/80 p-3 text-center">
+                <span className="mx-auto w-9 h-9 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center"><x.Icon size={18} /></span>
+                <span className="block text-[12.5px] font-semibold text-slate-700 mt-2">{i + 1}. {x.t}</span>
+              </li>
+            ))}
+          </ol>
         </div>
 
         {/* HUD */}
@@ -116,7 +129,7 @@ export default function VerifyAndEarnPage() {
         />
 
         {/* Main Content splits into Gallery (Left) and Tool (Right) */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-[600px]">
+        <div className="flex-1 flex flex-col lg:flex-row gap-6 lg:items-start">
           <div className="lg:w-7/12">
             <TaskGallery 
               onSelect={setSelectedTask} 
@@ -124,7 +137,7 @@ export default function VerifyAndEarnPage() {
               completedTaskIds={completedTaskIds}
             />
           </div>
-          <div className="lg:w-5/12">
+          <div className="lg:w-5/12 lg:sticky lg:top-[96px]">
             <AnnotationTool 
               task={selectedTask}
               onComplete={handleTaskComplete}
@@ -136,9 +149,9 @@ export default function VerifyAndEarnPage() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-8 right-8 bg-slate-900 border border-white/10 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center justify-between gap-4 animate-fade-in-up z-50">
-          <div className="font-semibold">{toastMessage}</div>
-          <button onClick={() => setToastMessage(null)} className="text-slate-400 hover:text-white">✕</button>
+        <div role="status" className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-8 sm:bottom-8 bg-slate-900 text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 z-50">
+          <div className="flex items-center gap-2 font-semibold text-[15px]"><CheckCircle2 size={18} className="text-emerald-400 shrink-0" /> {toastMessage}</div>
+          <button onClick={() => setToastMessage(null)} aria-label="Close" className="text-slate-400 hover:text-white"><X size={18} /></button>
         </div>
       )}
 

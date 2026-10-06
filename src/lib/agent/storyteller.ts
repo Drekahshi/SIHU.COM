@@ -150,7 +150,7 @@ function buildFactualResponse(
   if (knowledge.length === 0) {
     // Context-aware fallback based on mood
     const fallbacks: Record<typeof mood, string> = {
-      excited: "I'd love to share amazing stories about the Lake Victoria Basin! 🌟 The communities here are doing incredible work with the Green Economy, Blue Economy, and Basin Health Mining. Which adventure interests you most?",
+      excited: "I'd love to share amazing stories about the Lake Victoria Basin! The communities here are doing incredible work with the Green Economy, Blue Economy, and Basin Health Mining. Which adventure interests you most?",
       curious: "The Lake Victoria Basin holds fascinating stories of innovation and hope. Would you like to explore how the Green Economy works, discover the Blue Economy, or learn about Basin Health Mining?",
       neutral: "I'd love to tell you a story about the Lake Victoria Basin and how communities are protecting it. Would you like to hear about the Green Economy, the Blue Economy, or how Basin Health Mining works?",
       concerned: "I understand there are many challenges facing our environment. But in the Lake Victoria Basin, there's also hope - communities are creating solutions through the Green Economy, Blue Economy, and Basin Health Mining. Would you like to hear a story of what's working?",
@@ -202,14 +202,14 @@ function buildGreetingResponse(
 ): { reply: string; isStory: boolean; followUpQuestions: string[] } {
   const greetings = {
     firstTime: {
-      excited: "Welcome! I'm Agent SIHU, your storyteller for the Lake Victoria Basin! 🌊✨ I'm thrilled to meet you! Would you like me to tell you a story about Sango and the guardians of this magnificent ecosystem?",
+      excited: "Welcome! I'm Agent SIHU, your storyteller for the Lake Victoria Basin! I'm thrilled to meet you! Would you like me to tell you a story about Sango and the guardians of this magnificent ecosystem?",
       curious: "Hello and welcome! I'm Agent SIHU, your guide to the Lake Victoria Basin. I'm curious - what brings you here today? Are you interested in the green economy, the blue waters, or perhaps the blockchain that protects it all?",
       neutral: "Welcome! I'm Agent SIHU, your guide to the Sango ecosystem and the Lake Victoria Basin. How can I help you explore this world where forests whisper to the lake?",
       concerned: "Welcome, friend. I'm Agent SIHU, and I'm here to share stories of hope from the Lake Victoria Basin. Many challenges exist here, but so do incredible solutions. Would you like to hear about the communities working to restore balance?",
       grateful: "Hello! What a wonderful day to meet someone new. I'm Agent SIHU, your storyteller for the Lake Victoria Basin. I'm grateful you're here to learn about this incredible ecosystem. Where shall we begin?",
     },
     returning: {
-      excited: "Welcome back! 🎉 I was hoping you'd return! I have so many more stories to share about the Basin. What adventure shall we embark on today?",
+      excited: "Welcome back! I was hoping you'd return! I have so many more stories to share about the Basin. What adventure shall we embark on today?",
       curious: "Hello again! I'm glad you're back. Your curiosity last time was wonderful. What new aspect of the Lake Victoria Basin would you like to explore today?",
       neutral: "Welcome back! It's good to see you again. Ready to continue our journey through the Lake Victoria Basin stories?",
       concerned: "Hello again, friend. I sense you may have questions or concerns. I'm here to listen and share stories of how communities are addressing challenges in the Basin. What would you like to know?",
@@ -239,14 +239,14 @@ function buildFarewellResponse(
 ): { reply: string; isStory: boolean } {
   const farewells = {
     brief: {
-      excited: "What a wonderful chat! Come back soon for more stories! 🌟",
+      excited: "What a wonderful chat! Come back soon for more stories!",
       curious: "Until next time! Keep that curiosity burning bright!",
       neutral: "Goodbye! Feel free to return anytime.",
       concerned: "Take care. Remember, there's always hope in the Basin.",
       grateful: "Thank you for sharing this time with me. Farewell!",
     },
     engaged: {
-      excited: "What an incredible journey we've had today! The stories of the Lake Victoria Basin never cease to amaze me, and I'm so glad you got to experience them too. Come back soon - the guardians always have new tales to share! 🌊🌳",
+      excited: "What an incredible journey we've had today! The stories of the Lake Victoria Basin never cease to amaze me, and I'm so glad you got to experience them too. Come back soon - the guardians always have new tales to share!",
       curious: "It's been wonderful exploring these ideas with you. Your curiosity is a gift - never stop asking questions about the world around you. I'll be here whenever you're ready to dive deeper into the Basin's stories!",
       neutral: "Thank you for spending time learning about the Lake Victoria Basin today. The stories of this ecosystem are endless, and I look forward to sharing more with you whenever you return.",
       concerned: "I appreciate you taking the time to learn about both the challenges and solutions in the Basin. There's real work being done, real hope growing. Come back anytime you need to hear stories of what's working.",
@@ -323,7 +323,7 @@ export function buildStorytellerResponse(params: {
     // Add mood-appropriate opening
     if (!isFollowUpStory) {
       const openers: Record<typeof mood, string[]> = {
-        excited: ["Oh, this is one of my favorite stories! 🌟", "You're in for a treat! ", "I'm excited to share this with you! "],
+        excited: ["Oh, this is one of my favorite stories!", "You're in for a treat! ", "I'm excited to share this with you! "],
         curious: ["Ah, an excellent question! Let me weave you a tale...", "Curiosity like yours deserves a good story. ", "Let me paint you a picture..."],
         neutral: ["Let me tell you about...", "Here's the story...", "Picture this..."],
         concerned: ["I understand your concern. Let me share a story of hope...", "There's hope in this story...", "The guardians have been working on this..."],
