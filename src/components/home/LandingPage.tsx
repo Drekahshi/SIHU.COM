@@ -89,7 +89,7 @@ export default function LandingPage() {
       {/* ===== HERO ===== */}
       <section className="relative min-h-[100svh] flex items-center overflow-hidden bg-slate-950 pt-[72px]">
         <motion.div className="absolute inset-0" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 8, ease: "easeOut" }}>
-          <Image src="/images/lake-victoria-sunrise-hd.png" alt="" fill priority quality={85} sizes="100vw" className="object-cover object-[center_45%]" />
+          <Image src="/images/lake-fisherman-hero.jpg" alt="Fisherman casting a net on Lake Victoria at golden hour" fill priority quality={90} sizes="100vw" className="object-cover object-[center_40%]" />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-slate-950/15" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/80 to-transparent" />
@@ -204,7 +204,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="absolute -bottom-6 -left-4 md:-left-8 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 max-w-[280px]">
-              <Image src="/images/sihu-logo.png" alt="" width={48} height={48} className="w-12 h-12 rounded-xl object-cover" />
+              <Image src="/images/logo-main.png" alt="Sango Information Hub" width={48} height={48} className="w-12 h-12 rounded-xl object-contain" />
               <div>
                 <p className="font-bold text-[15px] leading-tight">Sango Information Hub</p>
                 <p className="text-[13px] text-slate-500">We care about Lake Victoria</p>
@@ -216,7 +216,7 @@ export default function LandingPage() {
 
       {/* ===== WHAT WE STAND FOR ===== */}
       <section id="pillars" className="scroll-mt-20 relative overflow-hidden bg-slate-950 text-white py-20 md:py-28">
-        <Image src="/images/sihu_network_bg.png" alt="" fill sizes="100vw" className="object-cover opacity-35" />
+        <Image src="/images/lake-victoria-map.png" alt="" fill sizes="100vw" className="object-cover opacity-20" />
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/80 to-slate-950" />
         <div className="relative container mx-auto max-w-7xl px-4 lg:px-8">
           <div className="max-w-2xl">
