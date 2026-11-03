@@ -138,7 +138,7 @@ export default function MediaSidebar() {
         </div>
       </aside>
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex items-center justify-around px-2 h-14">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex items-center justify-around px-1 h-14 safe-bottom" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {navItems.filter(n => MOBILE_LABELS.has(n.label)).map(item => (
           <MobileNavItem key={item.label} item={item} on={active(item)} />
         ))}

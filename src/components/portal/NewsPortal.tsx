@@ -185,7 +185,7 @@ export default function NewsPortal() {
 
       {/* Masthead */}
       <header className="relative overflow-hidden group">
-        <Image src="/images/lake-fisherman-hero.jpg" alt="Fisherman casting a net on Lake Victoria" fill priority sizes="100vw" className="object-cover object-[center_40%] transition-all duration-700 group-hover:scale-105 group-hover:brightness-75" />
+        <Image src="/images/lake-fisherman-hero.jpg" alt="Fisherman casting a net on Lake Victoria" fill priority sizes="100vw" className="object-cover object-[center_40%] animate-netcast" />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-900/30 group-hover:from-slate-950/95 transition-all duration-700" />
         {/* Caption slides up on hover — same effect as Our Story */}
         <div className="absolute bottom-6 left-0 right-0 px-8 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none hidden md:block">

@@ -68,10 +68,10 @@ export default function LandingPage() {
     <div className="bg-white text-slate-900">
       {/* ===== HERO ===== */}
       <section className="relative min-h-[100svh] flex items-center overflow-hidden bg-slate-950 pt-[72px]">
-        <motion.div className="absolute inset-0" initial={{ scale: 1.12 }} animate={{ scale: 1 }} transition={{ duration: 8, ease: "easeOut" }}>
-          <Image src="/images/lake-fisherman-hero.jpg" alt="Fisherman casting a net on Lake Victoria at golden hour" fill priority quality={90} sizes="100vw" className="object-cover object-[center_40%]" />
-        </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-slate-950/15" />
+        <div className="absolute inset-0">
+          <Image src="/images/lake-fisherman-hero.jpg" alt="Fisherman casting a net on Lake Victoria at golden hour" fill priority quality={90} sizes="100vw" className="object-cover object-[center_40%] animate-netcast" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/60 to-slate-950/20" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/80 to-transparent" />
 
         <div className="relative container mx-auto max-w-7xl px-4 lg:px-8 py-16">
@@ -79,17 +79,17 @@ export default function LandingPage() {
             <motion.div variants={fade} initial="hidden" animate="show" custom={0} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-[13px] font-semibold text-white">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Sango Information Hub · Busia, Kenya
             </motion.div>
-            <motion.h1 variants={fade} initial="hidden" animate="show" custom={1} className="font-heading text-white text-[40px] leading-[1.08] sm:text-6xl lg:text-[68px] font-bold mt-6">
+            <motion.h1 variants={fade} initial="hidden" animate="show" custom={1} className="font-heading text-white text-[28px] min-[375px]:text-[34px] sm:text-5xl lg:text-[64px] font-bold leading-[1.1] mt-5">
               We care about <span className="text-sky-300">Lake Victoria.</span>
             </motion.h1>
-            <motion.p variants={fade} initial="hidden" animate="show" custom={2} className="text-slate-200 text-lg md:text-xl leading-relaxed mt-6 max-w-2xl">
+            <motion.p variants={fade} initial="hidden" animate="show" custom={2} className="text-slate-200 text-base md:text-lg leading-relaxed mt-4 max-w-2xl">
               We have established a very solid stakeholder engagement, community involvement and information gathering network through outreaches, promotional activities and content tapping and dissemination strategies.
             </motion.p>
-            <motion.div variants={fade} initial="hidden" animate="show" custom={3} className="flex flex-wrap gap-3 mt-9">
-              <Link href="/portal" className="group inline-flex items-center gap-2 px-7 py-4 rounded-full bg-sky-500 hover:bg-sky-400 text-white text-[16px] font-semibold shadow-lg shadow-sky-500/30 transition-colors">
-                Read the latest news <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+            <motion.div variants={fade} initial="hidden" animate="show" custom={3} className="flex flex-wrap gap-3 mt-7">
+              <Link href="/portal" className="group inline-flex items-center gap-2 px-5 py-3 sm:px-7 sm:py-4 rounded-full bg-sky-500 hover:bg-sky-400 text-white text-[15px] sm:text-[16px] font-semibold shadow-lg shadow-sky-500/30 transition-all duration-300">
+                Read the latest news <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
               </Link>
-              <a href="#story" className="inline-flex items-center gap-2 px-7 py-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/25 text-white text-[16px] font-semibold transition-colors">
+              <a href="#story" className="inline-flex items-center gap-2 px-5 py-3 sm:px-7 sm:py-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur border border-white/25 text-white text-[15px] sm:text-[16px] font-semibold transition-all duration-300">
                 Our story
               </a>
             </motion.div>
@@ -99,22 +99,22 @@ export default function LandingPage() {
 
       {/* ===== THE LAKE IN NUMBERS ===== */}
       <section className="bg-slate-950 text-white border-t border-white/10">
-        <div className="container mx-auto max-w-7xl px-4 lg:px-8 py-10 grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="container mx-auto max-w-7xl px-4 lg:px-8 py-10 grid grid-cols-2 md:grid-cols-4 gap-4">
           {STATS.map((s, i) => (
             <motion.div key={s.label} variants={fade} initial="hidden" whileInView="show" viewport={{ once: true }} custom={i}>
-              <p className="font-heading text-4xl md:text-5xl font-bold text-sky-300">{s.value}{s.suffix}</p>
-              <p className="text-[14px] text-slate-300 mt-1 leading-snug">{s.label}</p>
+              <p className="font-heading text-2xl sm:text-4xl md:text-5xl font-bold text-sky-300 break-all leading-tight">{s.value}{s.suffix}</p>
+              <p className="text-[13px] text-slate-300 mt-1 leading-snug">{s.label}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* ===== INTRODUCTION (2-column, world map background — mirrors old SIHU) ===== */}
-      <section className="relative py-20 md:py-28 overflow-hidden">
+      <section className="relative py-16 md:py-28 overflow-hidden">
         <Image src="/images/Map.png" alt="" fill sizes="100vw" className="object-contain object-center opacity-100" />
-        <div className="absolute inset-0 bg-white/20" />
+        <div className="absolute inset-0 bg-white/60 sm:bg-white/40" />
         <div className="relative container mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-16">
             <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
               <Eyebrow>Sango Information Hub</Eyebrow>
               <h2 className="font-heading text-[30px] md:text-[38px] font-bold leading-tight mt-3 text-slate-900">Introduction</h2>
@@ -192,33 +192,26 @@ export default function LandingPage() {
                 alt="Lake Victoria seen from space"
                 fill
                 sizes="(max-width: 1024px) 100vw, 600px"
-                className="object-cover object-center transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
+                className="object-cover object-center animate-netcast"
                 priority
               />
-              {/* Gradient overlay — fades in on hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-              {/* Caption slides up on hover */}
-              <div className="absolute bottom-0 left-0 right-0 p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                <p className="text-sky-300 text-[13px] font-bold uppercase tracking-[0.12em] mb-2">Lake Victoria from space</p>
-                <h3 className="text-white font-heading text-[22px] font-bold leading-snug">
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent opacity-60" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                <p className="text-sky-300 text-[12px] font-bold uppercase tracking-[0.12em] mb-1.5">Lake Victoria from space</p>
+                <h3 className="text-white font-heading text-[18px] sm:text-[22px] font-bold leading-snug">
                   Africa&apos;s largest freshwater lake — lifeblood of 40 million people across Kenya, Uganda and Tanzania.
                 </h3>
               </div>
-
-              {/* Badge */}
-              <div className="absolute top-5 right-5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[12px] font-semibold px-3 py-1.5 rounded-full opacity-80 group-hover:opacity-100 group-hover:bg-sky-500/80 group-hover:border-sky-400 transition-all duration-300">
+              <div className="absolute top-4 right-4 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[11px] font-semibold px-3 py-1.5 rounded-full">
                 🛰️ Satellite view
               </div>
-
-              {/* Logo watermark */}
-              <div className="absolute top-5 left-5 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-2.5 flex items-center gap-2.5 transition-all duration-300 group-hover:scale-105">
-                <Image src="/images/logo-main.png" alt="Sango Information Hub" width={90} height={27} className="h-7 w-auto object-contain" />
+              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-2 flex items-center gap-2 transition-all duration-300 group-hover:scale-105">
+                <Image src="/images/logo-main.png" alt="Sango Information Hub" width={80} height={24} className="h-6 w-auto object-contain" />
               </div>
             </div>
 
             {/* Floating info card */}
-            <div className="absolute -bottom-6 -left-4 md:-left-8 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 max-w-[280px]">
+            <div className="mt-6 md:absolute md:-bottom-6 md:-left-4 lg:-left-8 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 max-w-[280px] mx-auto md:mx-0">
               <Image src="/images/logo-main.png" alt="Sango Information Hub" width={48} height={48} className="w-12 h-auto object-contain shrink-0" />
               <div>
                 <p className="font-bold text-[15px] leading-tight">Sango Information Hub</p>
@@ -242,11 +235,11 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12">
             {PILLARS.map((p, i) => (
               <motion.div key={p.title} variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={i}
-                className="group rounded-3xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 hover:border-sky-400/40 p-7 transition-colors">
-                <span className="w-12 h-12 rounded-2xl bg-sky-400/15 text-sky-300 flex items-center justify-center group-hover:scale-110 transition-transform"><p.Icon size={22} /></span>
-                <p className="text-[12px] font-bold text-slate-400 mt-6">Pillar {i + 1}</p>
-                <h3 className="font-heading text-[20px] font-bold mt-1">{p.title}</h3>
-                <p className="text-[15px] text-slate-300 leading-relaxed mt-3">{p.text}</p>
+                className="group rounded-3xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 hover:border-sky-400/40 p-5 sm:p-7 transition-all duration-300">
+                <span className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-sky-400/15 text-sky-300 flex items-center justify-center group-hover:scale-110 transition-transform"><p.Icon size={20} /></span>
+                <p className="text-[11px] font-bold text-slate-400 mt-5">Pillar {i + 1}</p>
+                <h3 className="font-heading text-[18px] font-bold mt-1">{p.title}</h3>
+                <p className="text-[14px] text-slate-300 leading-relaxed mt-2">{p.text}</p>
               </motion.div>
             ))}
           </div>
