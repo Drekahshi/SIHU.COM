@@ -3,7 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { Heart, MessageCircle, Repeat2, Send, Bookmark, MoreHorizontal, MapPin, BadgeCheck } from 'lucide-react';
+import {
+  Heart, MessageCircle, Repeat2, Send, Bookmark,
+  MoreHorizontal, MapPin, BadgeCheck,
+} from 'lucide-react';
 import MediaCarousel from '@/components/media/MediaCarousel';
 import { usePostViewStore } from '@/store/media/modalStores';
 import type { MediaPost } from '@/lib/media/mockData';
@@ -17,6 +20,15 @@ function timeAgo(iso: string) {
 
 function formatCount(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+}
+
+// Cap extreme aspect ratios to a sensible range — prevents portrait images
+// from filling the entire screen on mobile.
+function safeAspectRatio(w: number, h: number): string {
+  const ratio = w / h;
+  if (ratio > 1.91) return '1.91 / 1'; // landscape max (Facebook/IG standard)
+  if (ratio < 0.5625) return '9 / 16';  // portrait max (story / reel)
+  return `${w} / ${h}`;
 }
 
 interface Props {
@@ -36,80 +48,95 @@ export default function MediaPostCard({ post }: Props) {
 
   const openPost = () => openModal(post);
 
+  const aspectRatio = safeAspectRatio(
+    post.images[0]?.width ?? 1,
+    post.images[0]?.height ?? 1,
+  );
+
   return (
     <article className="border-b border-slate-100 pb-4">
       {/* Header */}
-      <div className="flex items-center justify-between px-1 pt-4 pb-3">
-        <Link href={`/media/profile/${post.user.username}`} className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-3 sm:px-1 pt-4 pb-3">
+        <Link href={`/media/profile/${post.user.username}`} className="flex items-center gap-2.5">
           <Image
             src={post.user.avatar_url}
             alt={post.user.username}
-            width={40}
-            height={40}
-            className="rounded-full object-cover ring-2 ring-sky-300"
+            width={36}
+            height={36}
+            className="rounded-full object-cover ring-2 ring-sky-300 shrink-0"
           />
-          <div>
-            <p className="text-[14px] font-semibold text-slate-900 leading-tight flex items-center gap-1">
+          <div className="min-w-0">
+            <p className="text-[14px] font-semibold text-slate-900 leading-tight flex items-center gap-1 truncate">
               {post.user.username}
-              {post.user.is_verified && <BadgeCheck size={13} className="text-sky-500" />}
+              {post.user.is_verified && <BadgeCheck size={12} className="text-sky-500 shrink-0" />}
             </p>
-            <p className="text-[12px] text-slate-500 leading-tight">
+            <p className="text-[11px] text-slate-500 leading-tight">
               {timeAgo(post.created_at)}
               {post.location_name && (
-                <> · <MapPin size={10} className="inline" /> {post.location_name}</>
+                <> · <MapPin size={9} className="inline" /> {post.location_name}</>
               )}
             </p>
           </div>
         </Link>
-        <button className="text-slate-400 hover:text-slate-700 p-1 rounded-full hover:bg-slate-100 transition-colors">
-          <MoreHorizontal size={20} />
+        <button className="text-slate-400 p-1.5 rounded-full hover:bg-slate-100 transition-colors shrink-0">
+          <MoreHorizontal size={18} />
         </button>
       </div>
 
-      {/* Media */}
+      {/* Media — full bleed on mobile, rounded on sm+ */}
       <MediaCarousel
         post={post}
-        aspectRatio={`${post.images[0]?.width ?? 1} / ${post.images[0]?.height ?? 1}`}
+        aspectRatio={aspectRatio}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 630px, 468px"
         dotsBelow
         onDoubleClick={handleLike}
         onClick={openPost}
       />
 
       {/* Actions */}
-      <div className="flex items-center gap-1 px-1 mt-2">
+      <div className="flex items-center gap-0.5 px-2 sm:px-1 mt-1.5">
         <button
           onClick={handleLike}
-          className={`p-2 rounded-full transition-colors ${liked ? 'text-red-500' : 'text-slate-500 hover:text-slate-800'}`}
+          className={`p-2 rounded-full transition-all active:scale-90 ${
+            liked ? 'text-red-500' : 'text-slate-500'
+          }`}
         >
           <Heart size={22} fill={liked ? 'currentColor' : 'none'} strokeWidth={1.8} />
         </button>
         <button
           onClick={openPost}
-          className="p-2 rounded-full text-slate-500 hover:text-slate-800 transition-colors"
+          className="p-2 rounded-full text-slate-500 active:scale-90 transition-all"
         >
           <MessageCircle size={22} strokeWidth={1.8} />
         </button>
-        <button className="p-2 rounded-full text-slate-500 hover:text-slate-800 transition-colors">
+        <button className="p-2 rounded-full text-slate-500 active:scale-90 transition-all">
           <Repeat2 size={22} strokeWidth={1.8} />
         </button>
-        <button className="p-2 rounded-full text-slate-500 hover:text-slate-800 transition-colors">
+        <button className="p-2 rounded-full text-slate-500 active:scale-90 transition-all">
           <Send size={22} strokeWidth={1.8} />
         </button>
         <button
           onClick={() => setSaved(v => !v)}
-          className={`p-2 rounded-full ml-auto transition-colors ${saved ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'}`}
+          className={`p-2 rounded-full ml-auto transition-all active:scale-90 ${
+            saved ? 'text-slate-900' : 'text-slate-500'
+          }`}
         >
           <Bookmark size={22} fill={saved ? 'currentColor' : 'none'} strokeWidth={1.8} />
         </button>
       </div>
 
       {/* Stats + caption */}
-      <div className="px-1 space-y-0.5">
+      <div className="px-3 sm:px-1 space-y-0.5 mt-0.5">
         {!post.hide_likes && (
-          <p className="text-[13px] font-semibold text-slate-900">{formatCount(likeCount)} likes</p>
+          <p className="text-[13px] font-semibold text-slate-900">
+            {formatCount(likeCount)} likes
+          </p>
         )}
-        <p className="text-[14px] text-slate-800 leading-snug">
-          <Link href={`/media/profile/${post.user.username}`} className="font-semibold mr-1 hover:underline">
+        <p className="text-[14px] text-slate-800 leading-snug line-clamp-3">
+          <Link
+            href={`/media/profile/${post.user.username}`}
+            className="font-semibold mr-1 hover:underline"
+          >
             {post.user.username}
           </Link>
           {post.caption}
@@ -117,18 +144,18 @@ export default function MediaPostCard({ post }: Props) {
         {!post.comments_off && post.comment_count > 0 && (
           <button
             onClick={openPost}
-            className="text-[13px] text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-[12px] text-slate-400 mt-0.5"
           >
             View all {post.comment_count} comments
           </button>
         )}
         {post.comments[0] && (
-          <p className="text-[13px] text-slate-700">
+          <p className="text-[12px] text-slate-700 line-clamp-1">
             <span className="font-semibold">{post.comments[0].user.username}</span>{' '}
             {post.comments[0].content}
           </p>
         )}
-        <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-600 capitalize">
+        <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-600 capitalize mt-1">
           #{post.category}
         </span>
       </div>

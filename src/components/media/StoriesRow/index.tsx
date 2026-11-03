@@ -14,24 +14,28 @@ export default function StoriesRow() {
   };
 
   return (
-    <div className="relative mb-4 border border-slate-200 rounded-2xl bg-white px-4 py-3">
+    <div className="relative mb-4 border border-slate-200 rounded-2xl bg-white py-3 mx-0 sm:mx-0">
+      {/* Arrows — only on sm+ (pointer devices). Touch users swipe natively. */}
       <button
         onClick={() => scroll('left')}
-        className="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-slate-50 transition-colors"
+        className="hidden sm:flex absolute left-1 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow items-center justify-center hover:bg-slate-50 transition-colors"
+        aria-label="Scroll stories left"
       >
-        <ChevronLeft size={16} className="text-slate-600" />
+        <ChevronLeft size={15} className="text-slate-600" />
       </button>
       <button
         onClick={() => scroll('right')}
-        className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-slate-50 transition-colors"
+        className="hidden sm:flex absolute right-1 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white shadow items-center justify-center hover:bg-slate-50 transition-colors"
+        aria-label="Scroll stories right"
       >
-        <ChevronRight size={16} className="text-slate-600" />
+        <ChevronRight size={15} className="text-slate-600" />
       </button>
 
+      {/* Scroll strip */}
       <div
         ref={rowRef}
-        className="flex gap-4 overflow-x-auto px-4"
-        style={{ scrollbarWidth: 'none' }}
+        className="flex gap-3 overflow-x-auto px-3 sm:px-6"
+        style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
       >
         {/* Own story bubble */}
         <div className="flex flex-col items-center gap-1.5 shrink-0">
@@ -39,21 +43,21 @@ export default function StoriesRow() {
             <Image
               src={MEDIA_USER.avatar_url}
               alt="Your story"
-              width={56}
-              height={56}
+              width={52}
+              height={52}
               className="rounded-full object-cover border-2 border-slate-200"
             />
-            <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-sky-500 rounded-full flex items-center justify-center border-2 border-white">
-              <Plus size={11} strokeWidth={3} className="text-white" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-sky-500 rounded-full flex items-center justify-center border-2 border-white">
+              <Plus size={10} strokeWidth={3} className="text-white" />
             </span>
           </div>
-          <span className="text-[11px] text-slate-600 font-medium w-14 text-center truncate">
+          <span className="text-[10px] text-slate-600 font-medium w-[52px] text-center truncate leading-tight">
             Your story
           </span>
         </div>
 
         {MEDIA_STORIES.map(s => (
-          <button key={s.userId} className="flex flex-col items-center gap-1.5 shrink-0">
+          <button key={s.userId} className="flex flex-col items-center gap-1.5 shrink-0 active:opacity-70 transition-opacity">
             <div
               className={`p-[2px] rounded-full ${
                 s.hasUnseen
@@ -64,12 +68,12 @@ export default function StoriesRow() {
               <Image
                 src={s.avatarUrl}
                 alt={s.username}
-                width={52}
-                height={52}
+                width={48}
+                height={48}
                 className="rounded-full object-cover border-2 border-white"
               />
             </div>
-            <span className="text-[11px] text-slate-600 font-medium w-14 text-center truncate">
+            <span className="text-[10px] text-slate-600 font-medium w-[52px] text-center truncate leading-tight">
               {s.username}
             </span>
           </button>
