@@ -184,8 +184,24 @@ export default function LandingPage() {
             <p className="inline-flex items-center gap-2 mt-8 text-[14px] font-semibold text-slate-500"><MapPin size={16} className="text-sky-600" /> Fort Jesus Road, Busia Town</p>
           </motion.div>
           <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} custom={1} className="relative">
-            <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_80px_-30px_rgba(15,23,42,0.5)]">
-              <Image src="/images/lake-victoria-bg.png" alt="Satellite view of Lake Victoria" fill sizes="(max-width: 1024px) 100vw, 600px" className="object-cover" />
+            <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_80px_-30px_rgba(15,23,42,0.5)] group">
+              <Image src="/images/fisherman.jpg" alt="Fisherman casting a net on Lake Victoria at golden hour" fill sizes="(max-width: 1024px) 100vw, 600px" className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75" />
+
+              {/* Gradient overlay — fades in on hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Caption — slides up on hover */}
+              <div className="absolute bottom-0 left-0 right-0 p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                <p className="text-sky-300 text-[13px] font-bold uppercase tracking-[0.12em] mb-2">Lake Victoria Basin</p>
+                <h3 className="text-white font-heading text-[22px] font-bold leading-snug">
+                  A fisherman casts his net at dawn — a timeless story of community and the lake.
+                </h3>
+              </div>
+
+              {/* Corner badge — visible always, scales on hover */}
+              <div className="absolute top-5 right-5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[12px] font-semibold px-3 py-1.5 rounded-full opacity-80 group-hover:opacity-100 group-hover:bg-sky-500/80 group-hover:border-sky-400 transition-all duration-300">
+                📍 Busia, Kenya
+              </div>
             </div>
             <div className="absolute -bottom-6 -left-4 md:-left-8 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 max-w-[280px]">
               <Image src="/images/sihu-logo.png" alt="" width={48} height={48} className="w-12 h-12 rounded-xl object-cover" />
