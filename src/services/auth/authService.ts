@@ -34,7 +34,7 @@ export const authService = {
    * Verify admin password
    */
   verifyAdminPassword(password: string): boolean {
-    const ADMIN_PASSWORD = 'sihuhub';
+    const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'change-me-in-env';
     return password === ADMIN_PASSWORD;
   },
 

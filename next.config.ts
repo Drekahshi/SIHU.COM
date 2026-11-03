@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
 
   output: "standalone",
 
+  // Required to silence Turbopack conflict warning on Vercel (Next.js 16 default)
+  turbopack: {},
+
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [{ protocol: "https", hostname: "**" }],
@@ -18,14 +21,6 @@ const nextConfig: NextConfig = {
 
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
-  },
-
-  webpack(config, { dev }) {
-    if (dev) {
-      // Disable filesystem cache on dev — avoids OneDrive corruption
-      config.cache = false;
-    }
-    return config;
   },
 
   async headers() {
