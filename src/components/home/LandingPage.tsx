@@ -161,10 +161,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ===== INTRODUCTION (2-column, original Map.png background — mirrors old SIHU) ===== */}
+      {/* ===== INTRODUCTION (2-column, world map background — mirrors old SIHU) ===== */}
       <section className="relative py-20 md:py-28 overflow-hidden">
-        <Image src="/images/Map.png" alt="" fill sizes="100vw" className="object-cover object-center" />
-        <div className="absolute inset-0 bg-white/70" />
+        <Image src="/images/Map.png" alt="" fill sizes="100vw" className="object-contain object-center opacity-100" />
+        <div className="absolute inset-0 bg-white/60" />
         <div className="relative container mx-auto max-w-7xl px-4 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
             <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
@@ -238,47 +238,38 @@ export default function LandingPage() {
             </p>
           </motion.div>
           <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} custom={1} className="relative">
-            {/* SIHU logo as the main Our Story visual */}
-            <div className="relative rounded-[2rem] overflow-hidden shadow-[0_30px_80px_-30px_rgba(15,23,42,0.3)] bg-gradient-to-br from-sky-600 to-blue-800 flex items-center justify-center aspect-square">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
-              <div className="relative flex flex-col items-center justify-center gap-6 p-12">
-                <Image
-                  src="/images/logo-main.png"
-                  alt="Sango Information Hub"
-                  width={340}
-                  height={102}
-                  className="w-full max-w-[340px] h-auto object-contain drop-shadow-2xl"
-                  priority
-                />
-                <div className="text-center">
-                  <p className="text-white/90 text-[18px] font-heading font-semibold leading-snug">
-                    We care about Lake Victoria
-                  </p>
-                  <p className="text-sky-200 text-[14px] mt-2">
-                    Fort Jesus Road, Busia Town
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 w-full max-w-[260px]">
-                  {[
-                    { icon: '📻', text: 'Radio content production' },
-                    { icon: '📰', text: 'Community newspapers' },
-                    { icon: '🌊', text: 'Lake Victoria advocacy' },
-                    { icon: '👥', text: 'Community correspondents' },
-                  ].map(item => (
-                    <div key={item.text} className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2.5">
-                      <span className="text-[18px]">{item.icon}</span>
-                      <span className="text-white text-[13px] font-medium">{item.text}</span>
-                    </div>
-                  ))}
-                </div>
+            <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_80px_-30px_rgba(15,23,42,0.5)] group">
+              <Image
+                src="/images/lake-victoria-bg.png"
+                alt="Lake Victoria seen from space"
+                fill
+                sizes="(max-width: 1024px) 100vw, 600px"
+                className="object-cover object-center transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
+                priority
+              />
+              {/* Gradient overlay — fades in on hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Caption slides up on hover */}
+              <div className="absolute bottom-0 left-0 right-0 p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                <p className="text-sky-300 text-[13px] font-bold uppercase tracking-[0.12em] mb-2">Lake Victoria from space</p>
+                <h3 className="text-white font-heading text-[22px] font-bold leading-snug">
+                  Africa&apos;s largest freshwater lake — lifeblood of 40 million people across Kenya, Uganda and Tanzania.
+                </h3>
               </div>
-              {/* 📍 badge */}
-              <div className="absolute top-5 right-5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[12px] font-semibold px-3 py-1.5 rounded-full">
-                📍 Busia, Kenya
+
+              {/* Badge */}
+              <div className="absolute top-5 right-5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[12px] font-semibold px-3 py-1.5 rounded-full opacity-80 group-hover:opacity-100 group-hover:bg-sky-500/80 group-hover:border-sky-400 transition-all duration-300">
+                🛰️ Satellite view
+              </div>
+
+              {/* Logo watermark */}
+              <div className="absolute top-5 left-5 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-2.5 flex items-center gap-2.5 transition-all duration-300 group-hover:scale-105">
+                <Image src="/images/logo-main.png" alt="Sango Information Hub" width={90} height={27} className="h-7 w-auto object-contain" />
               </div>
             </div>
 
-            {/* Floating info card below-left */}
+            {/* Floating info card */}
             <div className="absolute -bottom-6 -left-4 md:-left-8 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 max-w-[280px]">
               <Image src="/images/logo-main.png" alt="Sango Information Hub" width={48} height={48} className="w-12 h-auto object-contain shrink-0" />
               <div>
