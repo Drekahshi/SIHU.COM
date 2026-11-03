@@ -161,6 +161,51 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ===== INTRODUCTION (2-column, original Map.png background — mirrors old SIHU) ===== */}
+      <section className="relative py-20 md:py-28 overflow-hidden">
+        <Image src="/images/Map.png" alt="" fill sizes="100vw" className="object-cover object-center" />
+        <div className="absolute inset-0 bg-white/70" />
+        <div className="relative container mx-auto max-w-7xl px-4 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
+            <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
+              <Eyebrow>Sango Information Hub</Eyebrow>
+              <h2 className="font-heading text-[30px] md:text-[38px] font-bold leading-tight mt-3 text-slate-900">Introduction</h2>
+              <div className="space-y-4 mt-6 text-[16px] text-slate-700 leading-relaxed">
+                <p>
+                  Sango Information Hub (SIHU) is a registered community media initiative that works on knowledge management and information sharing on natural resources, environmental protection and development around the Lake Victoria Basin in Kenya.
+                </p>
+                <p>
+                  SIHU works through community involvement in production of radio content, digital information gathering and sharing, a community information and traditional knowledge restoration centre, and production of regular community newspapers — both print and e-paper.
+                </p>
+                <p>
+                  The office is located at Fort Jesus Road in Busia town. The Group&apos;s membership is drawn from across Kenyans residing within the Lake Victoria Basin with interest on human rights, development and environmental protection.
+                </p>
+                <p>
+                  The community media initiative — <em>Sango</em> is the indigenous name for Lake Victoria — produces content and information through community correspondents with focus on development news and environmental protection in the Lake Victoria Basin.
+                </p>
+              </div>
+            </motion.div>
+            <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} custom={1}>
+              <Eyebrow>The Basin</Eyebrow>
+              <h2 className="font-heading text-[30px] md:text-[38px] font-bold leading-tight mt-3 text-slate-900">Lake Victoria Region</h2>
+              <div className="space-y-4 mt-6 text-[16px] text-slate-700 leading-relaxed">
+                <p>
+                  The Lake Victoria Basin Region is made up of ten counties in Kenya, mostly the Western and Nyanza regions, covering nearly 10% of Kenya&apos;s territory. The region is highly densely populated and lies between latitudes 1°16′N and 1°54′S and longitudes 33°55′ and 35°51′E. The equator passes across the region.
+                </p>
+                <p>
+                  The average annual rainfall varies from 700mm along the Lake Victoria shores to 2,000mm in the highlands. Key livelihoods affected include areas around Rivers Yala, Nzoia and Suo, and catchment ecosystems including Mt. Elgon, Lugari, Butere-Mumias, Bungoma, Teso, Busia, Kakamega, Vihiga, Homa Bay, Kisumu, Siaya and Bondo.
+                </p>
+                <p>
+                  Despite better natural resource endowments, the Lake Victoria Basin has been noted as a poverty hotspot, with many people living below the poverty line due to high population density, lack of economic opportunities and rapid degradation of natural resources.
+                </p>
+                <p>
+                  The region is the most flood-prone in Kenya, due to geography, high rainfall, poor land-use practices, deforestation and accumulation of silt in the lower Nzoia Basin — the largest of the four sub-basins of Lake Victoria.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
       {/* ===== OUR STORY ===== */}
       <section id="story" className="scroll-mt-20 py-20 md:py-28">
         <div className="container mx-auto max-w-7xl px-4 lg:px-8 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -193,28 +238,43 @@ export default function LandingPage() {
             </p>
           </motion.div>
           <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} custom={1} className="relative">
-            <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_80px_-30px_rgba(15,23,42,0.5)] group">
-              <Image src="/images/fisherman.jpg" alt="Fisherman casting a net on Lake Victoria at golden hour" fill sizes="(max-width: 1024px) 100vw, 600px" className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75" />
-
-              {/* Gradient overlay — fades in on hover */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-              {/* Caption — slides up on hover */}
-              <div className="absolute bottom-0 left-0 right-0 p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                <p className="text-sky-300 text-[13px] font-bold uppercase tracking-[0.12em] mb-2">Lake Victoria Basin</p>
-                <h3 className="text-white font-heading text-[22px] font-bold leading-snug">
-                  A fisherman casts his net at dawn — a timeless story of community and the lake.
-                </h3>
+            {/* SIHU logo as the main Our Story visual */}
+            <div className="relative rounded-[2rem] overflow-hidden shadow-[0_30px_80px_-30px_rgba(15,23,42,0.3)] bg-gradient-to-br from-sky-600 to-blue-800 flex items-center justify-center aspect-square">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
+              <div className="relative flex flex-col items-center justify-center gap-6 p-12">
+                <Image
+                  src="/images/logo-main.png"
+                  alt="Sango Information Hub"
+                  width={340}
+                  height={102}
+                  className="w-full max-w-[340px] h-auto object-contain drop-shadow-2xl"
+                  priority
+                />
+                <div className="text-center">
+                  <p className="text-white/90 text-[18px] font-heading font-semibold leading-snug">
+                    We care about Lake Victoria
+                  </p>
+                  <p className="text-sky-200 text-[14px] mt-2">
+                    Fort Jesus Road, Busia Town
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 w-full max-w-[260px]">
+                  {[
+                    { icon: '📻', text: 'Radio content production' },
+                    { icon: '📰', text: 'Community newspapers' },
+                    { icon: '🌊', text: 'Lake Victoria advocacy' },
+                    { icon: '👥', text: 'Community correspondents' },
+                  ].map(item => (
+                    <div key={item.text} className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2.5">
+                      <span className="text-[18px]">{item.icon}</span>
+                      <span className="text-white text-[13px] font-medium">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-
-              {/* Corner badge */}
-              <div className="absolute top-5 right-5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[12px] font-semibold px-3 py-1.5 rounded-full opacity-80 group-hover:opacity-100 group-hover:bg-sky-500/80 group-hover:border-sky-400 transition-all duration-300">
+              {/* 📍 badge */}
+              <div className="absolute top-5 right-5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[12px] font-semibold px-3 py-1.5 rounded-full">
                 📍 Busia, Kenya
-              </div>
-
-              {/* Official logo watermark — always visible bottom-left */}
-              <div className="absolute top-5 left-5 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-2.5 flex items-center gap-2.5 transition-all duration-300 group-hover:scale-105">
-                <Image src="/images/logo-main.png" alt="Sango Information Hub" width={90} height={27} className="h-7 w-auto object-contain" />
               </div>
             </div>
 
@@ -295,14 +355,35 @@ export default function LandingPage() {
             <div className="grid md:grid-cols-3 gap-6 mt-10">
               {stories.slice(0, 3).map((s, i) => (
                 <motion.div key={s.id} variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={i}>
-                  <Link href={`/portal/article/${s.id}`} className="group block">
-                    <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100">
-                      <Image src={s.image || "/images/lake-fisherman-hero.jpg"} alt={s.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <Link href={`/portal/article/${s.id}`} className="group block rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-500">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
+                      <Image
+                        src={s.image || "/images/lake-fisherman-hero.jpg"}
+                        alt={s.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-60"
+                      />
+                      {/* Gradient overlay — slides in on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
+                      {/* Category badge */}
+                      <span className="absolute top-3 left-3 bg-white/95 text-slate-900 text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
+                        {s.category}
+                      </span>
+                      {/* Title slides up on hover */}
+                      <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                        <h3 className="text-white font-heading text-[17px] font-bold leading-snug line-clamp-3">{s.title}</h3>
+                        <p className="text-sky-300 text-[12px] font-semibold mt-1.5">{s.author} · {s.time}</p>
+                      </div>
                     </div>
-                    <p className="text-[13px] font-semibold text-sky-700 mt-4">{s.category}</p>
-                    <h3 className="font-heading text-[19px] font-bold leading-snug mt-1 line-clamp-2 group-hover:text-sky-700 transition-colors">{s.title}</h3>
-                    <p className="text-[14px] text-slate-600 leading-relaxed mt-2 line-clamp-2">{s.excerpt}</p>
-                    <p className="text-[13px] text-slate-500 mt-3"><span className="font-semibold text-slate-700">{s.author}</span> · {s.time}</p>
+                    {/* Below-image metadata (visible without hover) */}
+                    <div className="bg-white px-5 py-4 border border-t-0 border-slate-200 rounded-b-2xl">
+                      <h3 className="font-heading text-[17px] font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-sky-700 transition-colors">{s.title}</h3>
+                      <p className="text-[13px] text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">{s.excerpt}</p>
+                      <p className="text-[12px] text-slate-400 mt-2">
+                        <span className="font-semibold text-slate-600">{s.author}</span> · {s.time}
+                      </p>
+                    </div>
                   </Link>
                 </motion.div>
               ))}

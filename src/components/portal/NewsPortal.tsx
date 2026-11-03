@@ -184,9 +184,14 @@ export default function NewsPortal() {
       )}
 
       {/* Masthead */}
-      <header className="relative overflow-hidden">
-        <Image src="/images/lake-victoria-sunrise-hd.png" alt="" fill priority sizes="100vw" className="object-cover object-[center_60%]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-900/30" />
+      <header className="relative overflow-hidden group">
+        <Image src="/images/lake-fisherman-hero.jpg" alt="Fisherman casting a net on Lake Victoria" fill priority sizes="100vw" className="object-cover object-[center_40%] transition-all duration-700 group-hover:scale-105 group-hover:brightness-75" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-900/30 group-hover:from-slate-950/95 transition-all duration-700" />
+        {/* Caption slides up on hover — same effect as Our Story */}
+        <div className="absolute bottom-6 left-0 right-0 px-8 translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none hidden md:block">
+          <p className="text-sky-300 text-[12px] font-bold uppercase tracking-[0.12em]">Lake Victoria Basin · Sango Information Hub</p>
+          <p className="text-white text-[16px] font-semibold mt-1">A fisherman casts his net — the lake is the lifeblood of 40 million people.</p>
+        </div>
         <div className="relative container mx-auto max-w-7xl px-4 lg:px-8 py-12 md:py-16">
           <p className="text-sky-300 text-[13px] font-semibold">{today}</p>
           <h1 className="font-heading text-white text-[32px] md:text-5xl font-bold leading-tight mt-2 max-w-3xl">
@@ -256,9 +261,17 @@ export default function NewsPortal() {
                 transition={{ duration: 0.35, delay: Math.min(i, 6) * 0.05 }}
                 className="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 hover:border-slate-300 shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:shadow-[0_18px_40px_-18px_rgba(15,23,42,0.25)] transition-all duration-300 flex flex-col"
               >
-                <Link href={`/portal/article/${article.id}`} className="block aspect-[16/10] overflow-hidden relative bg-slate-100">
-                  <SafeImage src={article.image} alt={article.title} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Link href={`/portal/article/${article.id}`} className="block aspect-[16/10] overflow-hidden relative bg-slate-900">
+                  <SafeImage src={article.image} alt={article.title} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px" className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-60" />
+                  {/* gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-500" />
+                  {/* category badge */}
                   <span className="absolute top-3 left-3 bg-white/95 text-slate-900 text-[12px] font-semibold px-2.5 py-1 rounded-full shadow-sm">{article.category}</span>
+                  {/* title slides up on hover */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <h3 className="text-white font-heading text-[16px] font-bold leading-snug line-clamp-3">{article.title}</h3>
+                    <p className="text-sky-300 text-[12px] font-semibold mt-1">{article.author} · {article.time}</p>
+                  </div>
                 </Link>
                 <div className="p-5 md:p-6 flex flex-col flex-1">
                   <Link href={`/portal/article/${article.id}`}>

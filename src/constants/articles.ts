@@ -43,7 +43,7 @@ Countries globally being signatories to the SDG 12 are embracing interventions t
     author: "Endrian Lupia",
     time: "6 min read",
     type: "article",
-    image: "/images/power_sector.png",
+    image: "/images/electric-pylon.jpg",
     excerpt: "Kenya faces a depressing power future even as the country boasts of several power sources ranging from solar, geothermal, wind, among other energy sources.",
     content: `Kenya faces a depressing power future even as the country boasts of several power sources ranging from solar, geothermal, wind, among other energy sources. Information attributed to the Kenya Power and Lighting Company (KPLC) indicates that electricity demand increased over the last two years, way ahead of the installed capacity for supply-while the country has increased the capacity of the national grid, consumption has doubled over the same period, with no plans to deal with the situation soon.
 
