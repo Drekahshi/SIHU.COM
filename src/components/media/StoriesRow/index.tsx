@@ -1,11 +1,39 @@
+'use client';
+
 import Image from 'next/image';
-import { Plus } from 'lucide-react';
+import { useRef } from 'react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MEDIA_STORIES, MEDIA_USER } from '@/lib/media/mockData';
 
 export default function StoriesRow() {
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (dir: 'left' | 'right') => {
+    if (!rowRef.current) return;
+    rowRef.current.scrollBy({ left: dir === 'right' ? 320 : -320, behavior: 'smooth' });
+  };
+
   return (
-    <div className="mb-6 border border-slate-200 rounded-2xl bg-white p-4">
-      <div className="flex gap-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+    <div className="relative mb-4 border border-slate-200 rounded-2xl bg-white px-4 py-3">
+      <button
+        onClick={() => scroll('left')}
+        className="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-slate-50 transition-colors"
+      >
+        <ChevronLeft size={16} className="text-slate-600" />
+      </button>
+      <button
+        onClick={() => scroll('right')}
+        className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center hover:bg-slate-50 transition-colors"
+      >
+        <ChevronRight size={16} className="text-slate-600" />
+      </button>
+
+      <div
+        ref={rowRef}
+        className="flex gap-4 overflow-x-auto px-4"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {/* Own story bubble */}
         <div className="flex flex-col items-center gap-1.5 shrink-0">
           <div className="relative">
             <Image
@@ -25,7 +53,7 @@ export default function StoriesRow() {
         </div>
 
         {MEDIA_STORIES.map(s => (
-          <div key={s.userId} className="flex flex-col items-center gap-1.5 shrink-0">
+          <button key={s.userId} className="flex flex-col items-center gap-1.5 shrink-0">
             <div
               className={`p-[2px] rounded-full ${
                 s.hasUnseen
@@ -44,7 +72,7 @@ export default function StoriesRow() {
             <span className="text-[11px] text-slate-600 font-medium w-14 text-center truncate">
               {s.username}
             </span>
-          </div>
+          </button>
         ))}
       </div>
     </div>

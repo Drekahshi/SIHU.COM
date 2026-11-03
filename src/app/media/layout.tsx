@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import MediaSidebar from '@/components/media/MediaSidebar';
+import MediaOverlays from '@/components/media/MediaOverlays';
 
 export const metadata: Metadata = {
   title: 'SIHU Media | Sango Information Hub',
@@ -13,6 +14,7 @@ export default function MediaLayout({ children }: { children: React.ReactNode })
       <main className="flex-1 ml-0 lg:ml-[244px] xl:ml-[280px] min-h-screen pb-14 lg:pb-0">
         {children}
       </main>
+      <MediaOverlays />
     </div>
   );
 }

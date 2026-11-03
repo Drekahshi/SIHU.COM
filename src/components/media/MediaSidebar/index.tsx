@@ -4,42 +4,88 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  Home,
-  Search,
-  Compass,
-  Film,
-  Send,
-  Heart,
-  PlusSquare,
-  User,
-  ArrowLeft,
+  Home, Search, Compass, Film, Send, Heart, PlusSquare, User, ArrowLeft,
 } from 'lucide-react';
+import { useMediaSearchStore, useMediaNotificationsStore, useCreatePostStore } from '@/store/media/modalStores';
 import { MEDIA_USER } from '@/lib/media/mockData';
+
+type NavAction = { href: string } | { action: () => void };
 
 interface NavItem {
   label: string;
-  href: string;
+  nav: NavAction;
   Icon: React.ElementType;
 }
 
-const NAV: NavItem[] = [
-  { label: 'Feed', href: '/media/feed', Icon: Home },
-  { label: 'Search', href: '/media/search', Icon: Search },
-  { label: 'Explore', href: '/media/explore', Icon: Compass },
-  { label: 'Reels', href: '/media/reels', Icon: Film },
-  { label: 'Messages', href: '/media/direct', Icon: Send },
-  { label: 'Liked', href: '/media/liked', Icon: Heart },
-  { label: 'Create', href: '/media/create', Icon: PlusSquare },
-  { label: 'Profile', href: '/media/profile', Icon: User },
-];
+function useNav(): NavItem[] {
+  const { open: openSearch } = useMediaSearchStore();
+  const { open: openNotifs } = useMediaNotificationsStore();
+  const { open: openCreate } = useCreatePostStore();
+
+  return [
+    { label: 'Feed',       nav: { href: '/media/feed' },    Icon: Home },
+    { label: 'Search',     nav: { action: openSearch },     Icon: Search },
+    { label: 'Explore',    nav: { href: '/media/explore' }, Icon: Compass },
+    { label: 'Reels',      nav: { href: '/media/reels' },   Icon: Film },
+    { label: 'Messages',   nav: { href: '/media/direct' },  Icon: Send },
+    { label: 'Liked',      nav: { href: '/media/liked' },   Icon: Heart },
+    { label: 'Create',     nav: { action: openCreate },     Icon: PlusSquare },
+    { label: 'Profile',    nav: { href: '/media/profile' }, Icon: User },
+  ];
+}
 
 const MOBILE_LABELS = new Set(['Feed', 'Explore', 'Reels', 'Create', 'Profile']);
 
+function NavLink({ item, on }: { item: NavItem; on: boolean }) {
+  const cls = `flex items-center gap-4 px-3 py-3 rounded-xl text-[15px] transition-colors ${
+    on
+      ? 'bg-slate-100 text-slate-900 font-semibold'
+      : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+  }`;
+
+  if ('href' in item.nav) {
+    return (
+      <Link href={item.nav.href} className={cls}>
+        <item.Icon size={22} strokeWidth={on ? 2.5 : 1.8} />
+        {item.label}
+      </Link>
+    );
+  }
+
+  return (
+    <button onClick={item.nav.action} className={cls + ' w-full text-left'}>
+      <item.Icon size={22} strokeWidth={on ? 2.5 : 1.8} />
+      {item.label}
+    </button>
+  );
+}
+
+function MobileNavItem({ item, on }: { item: NavItem; on: boolean }) {
+  const cls = `flex flex-col items-center justify-center gap-0.5 px-3 py-1 ${on ? 'text-sky-600' : 'text-slate-500'}`;
+
+  const inner = (
+    <>
+      <item.Icon size={22} strokeWidth={on ? 2.5 : 1.8} />
+      <span className="text-[10px] font-medium">{item.label}</span>
+    </>
+  );
+
+  if ('href' in item.nav) {
+    return <Link href={item.nav.href} className={cls}>{inner}</Link>;
+  }
+
+  return <button onClick={item.nav.action} className={cls}>{inner}</button>;
+}
+
 export default function MediaSidebar() {
   const path = usePathname() ?? '';
+  const navItems = useNav();
 
-  const active = (href: string) =>
-    href === '/media/feed' ? path === '/media' || path === '/media/feed' : path.startsWith(href);
+  const active = (item: NavItem) => {
+    if (!('href' in item.nav)) return false;
+    const href = item.nav.href;
+    return href === '/media/feed' ? path === '/media' || path === '/media/feed' : path.startsWith(href);
+  };
 
   return (
     <>
@@ -67,23 +113,9 @@ export default function MediaSidebar() {
         </Link>
 
         <nav className="flex-1 flex flex-col gap-0.5">
-          {NAV.map(({ label, href, Icon }) => {
-            const on = active(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-4 px-3 py-3 rounded-xl text-[15px] transition-colors ${
-                  on
-                    ? 'bg-slate-100 text-slate-900 font-semibold'
-                    : 'font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={22} strokeWidth={on ? 2.5 : 1.8} />
-                {label}
-              </Link>
-            );
-          })}
+          {navItems.map(item => (
+            <NavLink key={item.label} item={item} on={active(item)} />
+          ))}
         </nav>
 
         <div className="mt-auto pt-4 border-t border-slate-100">
@@ -107,21 +139,9 @@ export default function MediaSidebar() {
       </aside>
 
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 flex items-center justify-around px-2 h-14">
-        {NAV.filter(n => MOBILE_LABELS.has(n.label)).map(({ label, href, Icon }) => {
-          const on = active(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1 ${
-                on ? 'text-sky-600' : 'text-slate-500'
-              }`}
-            >
-              <Icon size={22} strokeWidth={on ? 2.5 : 1.8} />
-              <span className="text-[10px] font-medium">{label}</span>
-            </Link>
-          );
-        })}
+        {navItems.filter(n => MOBILE_LABELS.has(n.label)).map(item => (
+          <MobileNavItem key={item.label} item={item} on={active(item)} />
+        ))}
       </nav>
     </>
   );

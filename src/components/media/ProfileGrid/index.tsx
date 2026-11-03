@@ -95,7 +95,7 @@ export default function ProfileGrid() {
               className="relative aspect-square bg-slate-100 overflow-hidden group"
             >
               <Image
-                src={p.image_url}
+                src={p.images[0]?.url ?? ''}
                 alt={p.caption}
                 fill
                 className="object-cover group-hover:brightness-75 transition-all"

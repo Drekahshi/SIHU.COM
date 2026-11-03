@@ -38,7 +38,7 @@ export default function ExploreGrid() {
               style={{ aspectRatio: tall ? '0.8' : '1' }}
             >
               <Image
-                src={p.image_url}
+                src={p.images[0]?.url ?? ''}
                 alt={p.caption}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"

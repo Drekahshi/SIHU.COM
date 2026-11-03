@@ -4,17 +4,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Heart, MessageCircle, Repeat2, Send, Bookmark, MoreHorizontal, MapPin, BadgeCheck } from 'lucide-react';
+import MediaCarousel from '@/components/media/MediaCarousel';
+import { usePostViewStore } from '@/store/media/modalStores';
 import type { MediaPost } from '@/lib/media/mockData';
+
+function timeAgo(iso: string) {
+  const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
+  if (h < 1) return 'just now';
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
 
 function formatCount(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-}
-
-function timeAgo(iso: string) {
-  const diffH = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
-  if (diffH < 1) return 'just now';
-  if (diffH < 24) return `${diffH}h`;
-  return `${Math.floor(diffH / 24)}d`;
 }
 
 interface Props {
@@ -22,19 +24,23 @@ interface Props {
 }
 
 export default function MediaPostCard({ post }: Props) {
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [liked, setLiked] = useState(post.is_liked);
+  const [saved, setSaved] = useState(post.is_saved);
   const [likeCount, setLikeCount] = useState(post.like_count);
+  const { open: openModal } = usePostViewStore();
 
   const handleLike = () => {
     setLiked(v => !v);
     setLikeCount(c => (liked ? c - 1 : c + 1));
   };
 
+  const openPost = () => openModal(post);
+
   return (
-    <article className="border-b border-slate-100 py-5">
-      <div className="flex items-center justify-between mb-3 px-1">
-        <Link href="/media/profile" className="flex items-center gap-3">
+    <article className="border-b border-slate-100 pb-4">
+      {/* Header */}
+      <div className="flex items-center justify-between px-1 pt-4 pb-3">
+        <Link href={`/media/profile/${post.user.username}`} className="flex items-center gap-3">
           <Image
             src={post.user.avatar_url}
             alt={post.user.username}
@@ -50,12 +56,7 @@ export default function MediaPostCard({ post }: Props) {
             <p className="text-[12px] text-slate-500 leading-tight">
               {timeAgo(post.created_at)}
               {post.location_name && (
-                <>
-                  {' · '}
-                  <MapPin size={10} className="inline" />
-                  {' '}
-                  {post.location_name}
-                </>
+                <> · <MapPin size={10} className="inline" /> {post.location_name}</>
               )}
             </p>
           </div>
@@ -65,29 +66,27 @@ export default function MediaPostCard({ post }: Props) {
         </button>
       </div>
 
-      <div
-        className="w-full overflow-hidden rounded-xl bg-slate-100 mb-3"
-        style={{ aspectRatio: `${post.image_width}/${post.image_height}` }}
-      >
-        <Image
-          src={post.image_url}
-          alt={post.caption}
-          width={post.image_width}
-          height={post.image_height}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      {/* Media */}
+      <MediaCarousel
+        post={post}
+        aspectRatio={`${post.images[0]?.width ?? 1} / ${post.images[0]?.height ?? 1}`}
+        dotsBelow
+        onDoubleClick={handleLike}
+        onClick={openPost}
+      />
 
-      <div className="flex items-center gap-1 px-1 mb-2">
+      {/* Actions */}
+      <div className="flex items-center gap-1 px-1 mt-2">
         <button
           onClick={handleLike}
-          className={`p-2 rounded-full transition-colors ${
-            liked ? 'text-red-500' : 'text-slate-500 hover:text-slate-800'
-          }`}
+          className={`p-2 rounded-full transition-colors ${liked ? 'text-red-500' : 'text-slate-500 hover:text-slate-800'}`}
         >
           <Heart size={22} fill={liked ? 'currentColor' : 'none'} strokeWidth={1.8} />
         </button>
-        <button className="p-2 rounded-full text-slate-500 hover:text-slate-800 transition-colors">
+        <button
+          onClick={openPost}
+          className="p-2 rounded-full text-slate-500 hover:text-slate-800 transition-colors"
+        >
           <MessageCircle size={22} strokeWidth={1.8} />
         </button>
         <button className="p-2 rounded-full text-slate-500 hover:text-slate-800 transition-colors">
@@ -98,33 +97,35 @@ export default function MediaPostCard({ post }: Props) {
         </button>
         <button
           onClick={() => setSaved(v => !v)}
-          className={`p-2 rounded-full ml-auto transition-colors ${
-            saved ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
-          }`}
+          className={`p-2 rounded-full ml-auto transition-colors ${saved ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'}`}
         >
           <Bookmark size={22} fill={saved ? 'currentColor' : 'none'} strokeWidth={1.8} />
         </button>
       </div>
 
+      {/* Stats + caption */}
       <div className="px-1 space-y-0.5">
         {!post.hide_likes && (
           <p className="text-[13px] font-semibold text-slate-900">{formatCount(likeCount)} likes</p>
         )}
-        <p className="text-[14px] text-slate-800">
-          <Link href="/media/profile" className="font-semibold mr-1 hover:underline">
+        <p className="text-[14px] text-slate-800 leading-snug">
+          <Link href={`/media/profile/${post.user.username}`} className="font-semibold mr-1 hover:underline">
             {post.user.username}
           </Link>
           {post.caption}
         </p>
         {!post.comments_off && post.comment_count > 0 && (
-          <button className="text-[13px] text-slate-400 hover:text-slate-600 transition-colors">
+          <button
+            onClick={openPost}
+            className="text-[13px] text-slate-400 hover:text-slate-600 transition-colors"
+          >
             View all {post.comment_count} comments
           </button>
         )}
-        {post.first_comment && (
+        {post.comments[0] && (
           <p className="text-[13px] text-slate-700">
-            <span className="font-semibold">{post.first_comment.username}</span>{' '}
-            {post.first_comment.content}
+            <span className="font-semibold">{post.comments[0].user.username}</span>{' '}
+            {post.comments[0].content}
           </p>
         )}
         <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded-full bg-sky-50 text-sky-600 capitalize">
