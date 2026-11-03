@@ -1,18 +1,12 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { PrivyProvider, useLoginWithOAuth, usePrivy } from "@privy-io/react-auth";
+import React, { createContext, useContext } from "react";
 
-/*
- * SIHU sign-in uses the same Privy app as the KAI platform, so one account
- * (Google or email) works on both. Google uses Privy's full-page redirect,
- * which is more reliable than a popup on phones.
- */
+// Mock mode: Privy auth is disabled until credentials are configured.
+// The interface is fully preserved so all call-sites compile without changes.
 
 export interface SihuAuth {
-  /** false until Privy has checked for an existing session */
   ready: boolean;
-  /** false when no Privy app id is set for this site */
   available: boolean;
   signedIn: boolean;
   email: string | null;
@@ -23,66 +17,22 @@ export interface SihuAuth {
   getAccessToken: () => Promise<string | null>;
 }
 
-const OFF: SihuAuth = {
-  ready: true, available: false, signedIn: false, email: null, name: null,
-  signInWithGoogle: () => {}, signInWithEmail: () => {}, signOut: async () => {}, getAccessToken: async () => null,
+const MOCK_AUTH: SihuAuth = {
+  ready: true,
+  available: false,
+  signedIn: false,
+  email: null,
+  name: null,
+  signInWithGoogle: () => {},
+  signInWithEmail: () => {},
+  signOut: async () => {},
+  getAccessToken: async () => null,
 };
 
-const Ctx = createContext<SihuAuth>(OFF);
+const Ctx = createContext<SihuAuth>(MOCK_AUTH);
+
 export const useSihuAuth = () => useContext(Ctx);
 
-function Bridge({ children }: { children: React.ReactNode }) {
-  const { ready, authenticated, user, login, logout, getAccessToken } = usePrivy();
-  const { initOAuth } = useLoginWithOAuth();
-  const google = user?.google;
-  const email = user?.email?.address ?? google?.email ?? null;
-  const name = google?.name ?? null;
-
-  const signInWithGoogle = useCallback(() => { void initOAuth({ provider: "google" }); }, [initOAuth]);
-  const signInWithEmail = useCallback(() => login({ loginMethods: ["email"] }), [login]);
-
-  const value = useMemo<SihuAuth>(() => ({
-    ready, available: true, signedIn: ready && authenticated, email, name,
-    signInWithGoogle, signInWithEmail,
-    signOut: async () => { await logout(); },
-    getAccessToken: async () => { try { return await getAccessToken(); } catch { return null; } },
-  }), [ready, authenticated, email, name, signInWithGoogle, signInWithEmail, logout, getAccessToken]);
-
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
-}
-
-const LOADING: SihuAuth = { ...OFF, ready: false, available: true };
-const cleanId = (v: string | undefined | null) => (v ?? "").trim().replace(/^["']|["']$/g, "");
-
 export default function SihuAuthProvider({ children }: { children: React.ReactNode }) {
-  // Privy app ids are 25 characters; a wrong value must not take the site down.
-  // The id is baked in at build time when Vercel has it; otherwise it is
-  // fetched from this site's server, which reads the setting at run time.
-  const built = cleanId(process.env.NEXT_PUBLIC_PRIVY_APP_ID);
-  const [appId, setAppId] = useState<string | null | undefined>(built.length === 25 ? built : undefined);
-
-  useEffect(() => {
-    if (appId !== undefined) return;
-    let live = true;
-    fetch("/api/auth/config", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d: { appId?: string | null }) => { if (live) setAppId(cleanId(d.appId).length === 25 ? cleanId(d.appId) : null); })
-      .catch(() => { if (live) setAppId(null); });
-    return () => { live = false; };
-  }, [appId]);
-
-  if (appId === undefined) return <Ctx.Provider value={LOADING}>{children}</Ctx.Provider>;
-  if (appId === null) return <Ctx.Provider value={OFF}>{children}</Ctx.Provider>;
-  return (
-    <PrivyProvider
-      appId={appId}
-      config={{
-        loginMethodsAndOrder: { primary: ["email", "google"] },
-        appearance: { theme: "light", accentColor: "#0284c7", logo: "/images/logo-main.png" },
-        embeddedWallets: { ethereum: { createOnLogin: "off" } },
-      }}
-    >
-      <Bridge>{children}</Bridge>
-    </PrivyProvider>
-  );
+  return <Ctx.Provider value={MOCK_AUTH}>{children}</Ctx.Provider>;
 }
