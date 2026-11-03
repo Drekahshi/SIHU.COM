@@ -219,6 +219,9 @@ export default function NewsPortal() {
             {media.length > 0 && <a href="#media" className="hover:text-white">Photos &amp; videos</a>}
             <a href="#podcasts" className="hover:text-white">Podcasts</a>
             {events.length > 0 && <a href="#events" className="hover:text-white">Events</a>}
+            <Link href="/portal/submit" className="ml-auto inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-sky-500 hover:bg-sky-400 text-white text-[13px] font-semibold transition-colors">
+              + Submit article
+            </Link>
           </nav>
         </div>
       </header>

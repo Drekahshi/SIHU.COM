@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   ArrowRight, Megaphone, Leaf, Eye, ShieldAlert, Newspaper, Users, Coins, Building2, Laptop, ShieldCheck,
-  MapPin, Mail, Phone, Bot, Send, MessageCircle, Clock, CheckCircle2,
+  MapPin, Mail, Phone, Bot, Send, MessageCircle, CheckCircle2,
 } from "lucide-react";
-import type { Article } from "@/constants/articles";
-import { articleService } from "@/services/articleService";
 
 /*
  * The SIHU home page: who SIHU is, what it does, the latest stories, and
@@ -55,34 +53,16 @@ function Eyebrow({ children, light = false }: { children: React.ReactNode; light
 }
 
 export default function LandingPage() {
-  const [stories, setStories] = useState<Article[]>([]);
-  const [active, setActive] = useState(0);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
 
-  useEffect(() => {
-    let live = true;
-    articleService.getArticles().then((a) => { if (live) setStories(a.slice(0, 6)); }).catch(() => {});
-    return () => { live = false; };
-  }, []);
-
-  // The hero story card turns every 6 seconds.
-  useEffect(() => {
-    if (stories.length < 2) return;
-    const t = setInterval(() => setActive((i) => (i + 1) % Math.min(stories.length, 4)), 6000);
-    return () => clearInterval(t);
-  }, [stories.length]);
-
   const send = (e: React.FormEvent) => {
     e.preventDefault();
-    // The site has no mail server: open the visitor's email app, ready to send.
     const subject = `Message from ${form.name}`;
     const body = `${form.message}\n\nFrom: ${form.name} (${form.email})`;
     window.location.href = `mailto:${SIHU_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSent(true);
   };
-
-  const story = stories[active];
 
   return (
     <div className="bg-white text-slate-900">
@@ -115,36 +95,28 @@ export default function LandingPage() {
             </motion.div>
           </div>
 
-          {/* Latest story, turning */}
+          {/* News portal CTA card */}
           <motion.div variants={fade} initial="hidden" animate="show" custom={4} className="lg:col-span-5">
-            {story ? (
-              <div className="bg-white/95 backdrop-blur rounded-3xl p-3 shadow-2xl max-w-md lg:ml-auto">
-                <Link href={`/portal/article/${story.id}`} className="group block">
-                  <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100">
-                    <motion.div key={story.id} initial={{ opacity: 0, scale: 1.04 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="absolute inset-0">
-                      <Image src={story.image || "/images/lake-victoria-bg.png"} alt="" fill sizes="(max-width: 1024px) 100vw, 420px" className="object-cover" />
-                    </motion.div>
-                    <span className="absolute top-3 left-3 bg-white text-slate-900 text-[12px] font-semibold px-2.5 py-1 rounded-full">Latest story</span>
-                  </div>
-                  <div className="px-3 pt-4 pb-3">
-                    <p className="text-[12.5px] font-semibold text-sky-700">{story.category}</p>
-                    <motion.h2 key={`t-${story.id}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="font-heading text-[19px] font-bold leading-snug mt-1 line-clamp-2 group-hover:text-sky-700 transition-colors">{story.title}</motion.h2>
-                    <p className="flex items-center gap-1.5 text-[13px] text-slate-500 mt-2"><span className="font-semibold text-slate-700">{story.author}</span> · <Clock size={13} /> {story.time}</p>
-                  </div>
-                </Link>
-                <div className="flex items-center justify-between px-3 pb-2">
-                  <div className="flex gap-1.5" role="tablist" aria-label="Latest stories">
-                    {stories.slice(0, 4).map((s, i) => (
-                      <button key={s.id} role="tab" aria-selected={i === active} aria-label={`Story ${i + 1}`} onClick={() => setActive(i)}
-                        className={`h-1.5 rounded-full transition-all ${i === active ? "w-8 bg-sky-500" : "w-3 bg-slate-300 hover:bg-slate-400"}`} />
-                    ))}
-                  </div>
-                  <Link href="/portal" className="text-[13px] font-semibold text-sky-700 hover:text-sky-900">All news</Link>
-                </div>
+            <div className="bg-white/95 backdrop-blur rounded-3xl p-6 shadow-2xl max-w-md lg:ml-auto">
+              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100 mb-5">
+                <Image src="/images/lake-fisherman-hero.jpg" alt="Lake Victoria" fill sizes="420px" className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" />
+                <span className="absolute bottom-4 left-4 right-4 text-white font-heading text-[18px] font-bold leading-snug">
+                  News &amp; stories from the Lake Victoria Basin
+                </span>
               </div>
-            ) : (
-              <div className="hidden lg:block h-[380px] max-w-md ml-auto rounded-3xl bg-white/10 animate-pulse" />
-            )}
+              <p className="text-[14px] text-slate-600 leading-relaxed mb-5">
+                Community reporting on the environment, governance and development — from SIHU correspondents across the basin.
+              </p>
+              <div className="flex flex-col gap-2.5">
+                <Link href="/portal" className="flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-sky-600 hover:bg-sky-500 text-white text-[14px] font-semibold transition-colors">
+                  Read all stories →
+                </Link>
+                <Link href="/portal/submit" className="flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-slate-300 hover:border-sky-500 text-slate-700 text-[14px] font-semibold transition-colors">
+                  + Submit an article
+                </Link>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -164,7 +136,7 @@ export default function LandingPage() {
       {/* ===== INTRODUCTION (2-column, world map background — mirrors old SIHU) ===== */}
       <section className="relative py-20 md:py-28 overflow-hidden">
         <Image src="/images/Map.png" alt="" fill sizes="100vw" className="object-contain object-center opacity-100" />
-        <div className="absolute inset-0 bg-white/60" />
+        <div className="absolute inset-0 bg-white/20" />
         <div className="relative container mx-auto max-w-7xl px-4 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
             <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }}>
@@ -324,64 +296,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ===== FROM THE NEWSROOM ===== */}
-      {stories.length > 1 && (
-        <section className="py-20 md:py-28">
-          <div className="container mx-auto max-w-7xl px-4 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-              <div>
-                <Eyebrow>From the newsroom</Eyebrow>
-                <h2 className="font-heading text-[34px] md:text-[44px] font-bold leading-tight mt-3">Latest stories</h2>
-              </div>
-              <div className="flex items-center gap-3">
-                <Link href="/portal/submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-sky-600 hover:bg-sky-500 text-white text-[15px] font-semibold transition-colors">
-                  + Submit article
-                </Link>
-                <Link href="/portal" className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-slate-300 hover:border-slate-900 text-[15px] font-semibold transition-colors w-fit">
-                  All news <ArrowRight size={16} />
-                </Link>
-              </div>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6 mt-10">
-              {stories.slice(0, 3).map((s, i) => (
-                <motion.div key={s.id} variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={i}>
-                  <Link href={`/portal/article/${s.id}`} className="group block rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-500">
-                    <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
-                      <Image
-                        src={s.image || "/images/lake-fisherman-hero.jpg"}
-                        alt={s.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                        className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-60"
-                      />
-                      {/* Gradient overlay — slides in on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent opacity-40 group-hover:opacity-100 transition-opacity duration-500" />
-                      {/* Category badge */}
-                      <span className="absolute top-3 left-3 bg-white/95 text-slate-900 text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm">
-                        {s.category}
-                      </span>
-                      {/* Title slides up on hover */}
-                      <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                        <h3 className="text-white font-heading text-[17px] font-bold leading-snug line-clamp-3">{s.title}</h3>
-                        <p className="text-sky-300 text-[12px] font-semibold mt-1.5">{s.author} · {s.time}</p>
-                      </div>
-                    </div>
-                    {/* Below-image metadata (visible without hover) */}
-                    <div className="bg-white px-5 py-4 border border-t-0 border-slate-200 rounded-b-2xl">
-                      <h3 className="font-heading text-[17px] font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-sky-700 transition-colors">{s.title}</h3>
-                      <p className="text-[13px] text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">{s.excerpt}</p>
-                      <p className="text-[12px] text-slate-400 mt-2">
-                        <span className="font-semibold text-slate-600">{s.author}</span> · {s.time}
-                      </p>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ===== REACH US ===== */}
       <section className="pb-6">
