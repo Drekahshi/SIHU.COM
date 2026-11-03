@@ -1,5 +1,3 @@
-import { supabase } from '../utils/supabase/client';
-
 export type TickerItem = {
   id: string;
   text: string;
@@ -9,58 +7,39 @@ export type TickerItem = {
 
 const STORAGE_KEY = 'sango_ticker';
 
+const hasSupabase =
+  typeof process !== 'undefined' &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co';
+
 export const tickerService = {
   getTickerItems: async (): Promise<TickerItem[]> => {
+    if (!hasSupabase) return getTickerFromStorage();
     try {
-      const { data, error } = await supabase
-        .from('ticker_items')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching ticker from Supabase:', error);
-        return getTickerFromStorage();
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching ticker from Supabase:', error);
-      return getTickerFromStorage();
-    }
+      const { supabase } = await import('../utils/supabase/client');
+      const { data, error } = await supabase.from('ticker_items').select('*').order('created_at', { ascending: false });
+      if (error || !data) return getTickerFromStorage();
+      return data as TickerItem[];
+    } catch { return getTickerFromStorage(); }
   },
 
-  addTickerItem: async (text: string, isBreaking: boolean = false): Promise<void> => {
+  addTickerItem: async (text: string, isBreaking = false): Promise<void> => {
+    if (!hasSupabase) { addTickerToStorage({ id: Date.now().toString(), text, is_breaking: isBreaking }); return; }
     try {
-      const { error } = await supabase
-        .from('ticker_items')
-        .insert([{ text, is_breaking: isBreaking }]);
-
-      if (error) {
-        console.error('Error adding ticker to Supabase:', error);
-        addTickerToStorage({ id: Date.now().toString(), text, is_breaking: isBreaking });
-      }
-    } catch (error) {
-      console.error('Error adding ticker to Supabase:', error);
-      addTickerToStorage({ id: Date.now().toString(), text, is_breaking: isBreaking });
-    }
+      const { supabase } = await import('../utils/supabase/client');
+      const { error } = await supabase.from('ticker_items').insert([{ text, is_breaking: isBreaking }]);
+      if (error) addTickerToStorage({ id: Date.now().toString(), text, is_breaking: isBreaking });
+    } catch { addTickerToStorage({ id: Date.now().toString(), text, is_breaking: isBreaking }); }
   },
 
   deleteTickerItem: async (id: string): Promise<void> => {
+    if (!hasSupabase) { deleteTickerFromStorage(id); return; }
     try {
-      const { error } = await supabase
-        .from('ticker_items')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting ticker from Supabase:', error);
-        deleteTickerFromStorage(id);
-      }
-    } catch (error) {
-      console.error('Error deleting ticker from Supabase:', error);
-      deleteTickerFromStorage(id);
-    }
-  }
+      const { supabase } = await import('../utils/supabase/client');
+      const { error } = await supabase.from('ticker_items').delete().eq('id', id);
+      if (error) deleteTickerFromStorage(id);
+    } catch { deleteTickerFromStorage(id); }
+  },
 };
 
 // Local storage fallback

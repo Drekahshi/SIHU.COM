@@ -74,8 +74,8 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/55 to-slate-950/15" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-slate-950/80 to-transparent" />
 
-        <div className="relative container mx-auto max-w-7xl px-4 lg:px-8 py-16 grid lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-7">
+        <div className="relative container mx-auto max-w-7xl px-4 lg:px-8 py-16">
+          <div className="max-w-3xl">
             <motion.div variants={fade} initial="hidden" animate="show" custom={0} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-[13px] font-semibold text-white">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Sango Information Hub · Busia, Kenya
             </motion.div>
@@ -94,30 +94,6 @@ export default function LandingPage() {
               </a>
             </motion.div>
           </div>
-
-          {/* News portal CTA card */}
-          <motion.div variants={fade} initial="hidden" animate="show" custom={4} className="lg:col-span-5">
-            <div className="bg-white/95 backdrop-blur rounded-3xl p-6 shadow-2xl max-w-md lg:ml-auto">
-              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100 mb-5">
-                <Image src="/images/lake-fisherman-hero.jpg" alt="Lake Victoria" fill sizes="420px" className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" />
-                <span className="absolute bottom-4 left-4 right-4 text-white font-heading text-[18px] font-bold leading-snug">
-                  News &amp; stories from the Lake Victoria Basin
-                </span>
-              </div>
-              <p className="text-[14px] text-slate-600 leading-relaxed mb-5">
-                Community reporting on the environment, governance and development — from SIHU correspondents across the basin.
-              </p>
-              <div className="flex flex-col gap-2.5">
-                <Link href="/portal" className="flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-sky-600 hover:bg-sky-500 text-white text-[14px] font-semibold transition-colors">
-                  Read all stories →
-                </Link>
-                <Link href="/portal/submit" className="flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-slate-300 hover:border-sky-500 text-slate-700 text-[14px] font-semibold transition-colors">
-                  + Submit an article
-                </Link>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </section>
 

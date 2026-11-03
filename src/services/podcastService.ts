@@ -1,99 +1,75 @@
-import { supabase } from '../utils/supabase/client';
 import { Podcast, defaultPodcasts } from '../constants/articles';
 
 const STORAGE_KEY = 'sango_podcasts';
 
+const hasSupabase =
+  typeof process !== 'undefined' &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co';
+
 export const podcastService = {
   getPodcasts: async (): Promise<Podcast[]> => {
+    if (!hasSupabase) return getPodcastsFromStorage();
+
     try {
+      const { supabase } = await import('../utils/supabase/client');
       const { data, error } = await supabase
         .from('podcasts')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching podcasts from Supabase:', error);
-        return getPodcastsFromStorage();
-      }
+      if (error || !data || data.length === 0) return getPodcastsFromStorage();
 
-      if (data && data.length === 0) {
-          const localData = getPodcastsFromStorage();
-          return localData && localData.length > 0 ? localData : defaultPodcasts;
-      }
-
-      // Map Supabase fields to Podcast type
       return data.map((p: Record<string, unknown>) => ({
         id: p.id as string,
         title: p.title as string,
-        episode: (p.episode || p.description) as string, // Fallback
+        episode: (p.episode || p.description) as string,
         duration: p.duration as string,
-        image: (p.image || p.image_url) as string, // Handle rename
-        type: 'podcast' as const
-      })) || defaultPodcasts;
-    } catch (error) {
-      console.error('Error fetching podcasts from Supabase:', error);
+        image: (p.image || p.image_url) as string,
+        type: 'podcast' as const,
+      }));
+    } catch {
       return getPodcastsFromStorage();
     }
   },
 
   addPodcast: async (podcast: Podcast): Promise<void> => {
+    if (!hasSupabase) { addPodcastToStorage(podcast); return; }
     try {
-      const { error } = await supabase
-        .from('podcasts')
-        .insert([{
-          id: podcast.id,
-          title: podcast.title,
-          episode: podcast.episode,
-          duration: podcast.duration,
-          image: podcast.image,
-          type: 'podcast'
-        }]);
-
-      if (error) {
-        console.error('Error adding podcast to Supabase:', error);
-        addPodcastToStorage(podcast);
-      }
-    } catch (error) {
-      console.error('Error adding podcast to Supabase:', error);
+      const { supabase } = await import('../utils/supabase/client');
+      const { error } = await supabase.from('podcasts').insert([podcast]);
+      if (error) addPodcastToStorage(podcast);
+    } catch {
       addPodcastToStorage(podcast);
     }
   },
 
   deletePodcast: async (id: string): Promise<void> => {
+    if (!hasSupabase) { deletePodcastFromStorage(id); return; }
     try {
-      const { error } = await supabase
-        .from('podcasts')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting podcast from Supabase:', error);
-        deletePodcastFromStorage(id);
-      }
-    } catch (error) {
-      console.error('Error deleting podcast from Supabase:', error);
+      const { supabase } = await import('../utils/supabase/client');
+      const { error } = await supabase.from('podcasts').delete().eq('id', id);
+      if (error) deletePodcastFromStorage(id);
+    } catch {
       deletePodcastFromStorage(id);
     }
-  }
+  },
 };
 
-// Local storage fallback
 const getPodcastsFromStorage = (): Podcast[] => {
   if (typeof window === 'undefined') return defaultPodcasts;
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : defaultPodcasts;
+  return stored ? (JSON.parse(stored) as Podcast[]) : defaultPodcasts;
 };
 
 const addPodcastToStorage = (podcast: Podcast) => {
-  const podcasts = getPodcastsFromStorage();
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([podcast, ...podcasts]));
-  }
+  const list = getPodcastsFromStorage();
+  if (typeof window !== 'undefined')
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([podcast, ...list]));
 };
 
 const deletePodcastFromStorage = (id: string) => {
-  const podcasts = getPodcastsFromStorage().filter(p => p.id !== id);
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(podcasts));
-  }
+  const list = getPodcastsFromStorage().filter(p => p.id !== id);
+  if (typeof window !== 'undefined')
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 };
