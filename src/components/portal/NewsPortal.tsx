@@ -27,7 +27,7 @@ import {
   Headphones,
 } from "lucide-react";
 
-const FALLBACK = "/images/lake-victoria-bg.png";
+const FALLBACK = "/images/lake-fisherman-hero.jpg";
 
 /** next/image with a quiet fallback when a remote picture is missing. */
 function SafeImage({ src, alt, sizes, className, priority }: { src: string | null | undefined; alt: string; sizes: string; className?: string; priority?: boolean }) {

@@ -23,26 +23,26 @@ const SIHU_WHATSAPP = "https://wa.me/254722318820";
 const SIHU_TELEGRAM = "https://t.me/SihuHubBot";
 
 const PILLARS = [
-  { Icon: Megaphone, title: "Public engagement", text: "Public engagement on developmental issues through digital media and public forums." },
-  { Icon: Leaf, title: "Climate accountability", text: "Accountability demand on climate change and preservation of the Lake Victoria ecosystem." },
-  { Icon: Eye, title: "Public watchdog", text: "Amplifying community concerns on human rights and development." },
-  { Icon: ShieldAlert, title: "Safety and environment", text: "Sensitizing communities on the dangers of cross-border insecurity and on environmental protection." },
+  { Icon: Megaphone, title: "Public engagement", text: "Engage the public on developmental issues and environmental protection through online/digital media, radio, newspaper and public forums." },
+  { Icon: Leaf, title: "Climate accountability", text: "Generate demand for accountability both in government and public on climate change and preservation of the Lake Victoria ecosystem." },
+  { Icon: Eye, title: "Public watchdog", text: "Be the public watchdog and voice by amplifying concerns of communities around Lake Victoria on human rights and development issues." },
+  { Icon: ShieldAlert, title: "Cross-border safety", text: "Generate stories that sensitize communities on the dangers of cross-border insecurity and environmental protection issues within the county." },
 ];
 
 const OBJECTIVES = [
-  { Icon: Newspaper, title: "Quality content", text: "Producing professional content through a strong newsgathering network." },
-  { Icon: Users, title: "Civic engagement", text: "Building stakeholder networks and community involvement." },
-  { Icon: Coins, title: "Resources", text: "Sustainability through financial and human resource mobilization." },
-  { Icon: Building2, title: "Strong institution", text: "Modern equipment and strong editorial skills." },
-  { Icon: Laptop, title: "ICT integration", text: "Weaving digital and traditional channels into one production pipeline." },
-  { Icon: ShieldCheck, title: "Eco watchdog", text: "Demanding accountability on preserving the Lake Victoria ecosystem." },
+  { Icon: Newspaper, title: "Content generation", text: "For the hub to produce high quality and professional content, we have established an elaborate newsgathering network, editorial skills development structure and relevant modern equipment." },
+  { Icon: Users, title: "Community involvement", text: "We have established a very solid stakeholder engagement, community involvement and information gathering network through outreaches, promotional activities and content tapping and dissemination strategies." },
+  { Icon: Coins, title: "Resource mobilization", text: "The hub requires sufficient resources to finance its operations and improve performance. Both financial and human resources are critical to the success and sustainability of the hub." },
+  { Icon: Building2, title: "Institutional capacity", text: "For the hub to produce high quality and professional content, we have established an elaborate newsgathering network, editorial skills development structure and relevant modern equipment." },
+  { Icon: Laptop, title: "ICTs integration", text: "Weaving digital and traditional channels — radio, print, e-paper and online — into one integrated production pipeline that reaches all communities." },
+  { Icon: ShieldCheck, title: "Eco watchdog", text: "Demanding accountability on preserving the Lake Victoria ecosystem and generating stories that drive environmental protection and conservation action." },
 ];
 
 const STATS = [
   { value: 10, suffix: "", label: "counties in the Kenyan basin" },
-  { value: 40, suffix: "M+", label: "people depend on the lake" },
+  { value: 40, suffix: "M+", label: "people depend on Lake Victoria" },
   { value: 3, suffix: "", label: "countries share Lake Victoria" },
-  { value: 90, suffix: "%", label: "of the region's city water comes from the lake" },
+  { value: 700, suffix: "mm–2000mm", label: "annual rainfall range across the basin" },
 ];
 
 const fade = {
@@ -100,10 +100,10 @@ export default function LandingPage() {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Sango Information Hub · Busia, Kenya
             </motion.div>
             <motion.h1 variants={fade} initial="hidden" animate="show" custom={1} className="font-heading text-white text-[40px] leading-[1.08] sm:text-6xl lg:text-[68px] font-bold mt-6">
-              Elevating environmental governance <span className="text-sky-300">around Lake Victoria.</span>
+              We care about <span className="text-sky-300">Lake Victoria.</span>
             </motion.h1>
             <motion.p variants={fade} initial="hidden" animate="show" custom={2} className="text-slate-200 text-lg md:text-xl leading-relaxed mt-6 max-w-2xl">
-              We care about the lake. Community correspondents report on the environment, development and governance across the Lake Victoria Basin, so people can act on trusted information.
+              We have established a very solid stakeholder engagement, community involvement and information gathering network through outreaches, promotional activities and content tapping and dissemination strategies.
             </motion.p>
             <motion.div variants={fade} initial="hidden" animate="show" custom={3} className="flex flex-wrap gap-3 mt-9">
               <Link href="/portal" className="group inline-flex items-center gap-2 px-7 py-4 rounded-full bg-sky-500 hover:bg-sky-400 text-white text-[16px] font-semibold shadow-lg shadow-sky-500/30 transition-colors">
@@ -171,17 +171,26 @@ export default function LandingPage() {
               Sango Information Hub (SIHU) is a registered community media initiative that works on knowledge management and information sharing on natural resources, environmental protection and development around the Lake Victoria Basin in Kenya.
             </p>
             <p className="text-[17px] text-slate-600 leading-relaxed mt-4">
-              We work through community involvement: producing radio content, gathering and sharing digital information, and running a community information and traditional knowledge restoration centre.
+              SIHU works through community involvement in production of radio content, digital information gathering and sharing, a community information and traditional knowledge restoration centre, and production of regular community newspapers — both print and e-paper.
+            </p>
+            <p className="text-[17px] text-slate-600 leading-relaxed mt-4">
+              The community media initiative — Sango is the indigenous name for Lake Victoria — produces content and information through community correspondents with focus on development news and environmental protection in the Lake Victoria Basin.
             </p>
             <ul className="mt-8 space-y-3">
               {[
-                "The basin covers ten counties in Kenya, mostly in Western and Nyanza, nearly 10% of Kenya's territory, and is densely populated.",
+                "The Lake Victoria Basin covers ten counties in Kenya, mostly Western and Nyanza — nearly 10% of Kenya's territory — and is highly densely populated.",
+                "The region's annual rainfall varies from 700mm along the lake shores to 2,000mm in the highlands.",
+                "Despite rich natural resources, the basin has been noted as a poverty hotspot due to high population density, lack of economic opportunities, and rapid degradation of natural resources.",
                 "Our community correspondents produce development news and environmental protection stories from across the basin.",
               ].map((t) => (
-                <li key={t} className="flex gap-3 text-[16px] text-slate-700 leading-relaxed"><CheckCircle2 size={20} className="text-sky-600 shrink-0 mt-0.5" /> {t}</li>
+                <li key={t} className="flex gap-3 text-[16px] text-slate-700 leading-relaxed">
+                  <CheckCircle2 size={20} className="text-sky-600 shrink-0 mt-0.5" /> {t}
+                </li>
               ))}
             </ul>
-            <p className="inline-flex items-center gap-2 mt-8 text-[14px] font-semibold text-slate-500"><MapPin size={16} className="text-sky-600" /> Fort Jesus Road, Busia Town</p>
+            <p className="inline-flex items-center gap-2 mt-8 text-[14px] font-semibold text-slate-500">
+              <MapPin size={16} className="text-sky-600" /> Fort Jesus Road, Busia Town
+            </p>
           </motion.div>
           <motion.div variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-80px" }} custom={1} className="relative">
             <div className="relative aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_80px_-30px_rgba(15,23,42,0.5)] group">
@@ -198,13 +207,20 @@ export default function LandingPage() {
                 </h3>
               </div>
 
-              {/* Corner badge — visible always, scales on hover */}
+              {/* Corner badge */}
               <div className="absolute top-5 right-5 bg-white/15 backdrop-blur-sm border border-white/25 text-white text-[12px] font-semibold px-3 py-1.5 rounded-full opacity-80 group-hover:opacity-100 group-hover:bg-sky-500/80 group-hover:border-sky-400 transition-all duration-300">
                 📍 Busia, Kenya
               </div>
+
+              {/* Official logo watermark — always visible bottom-left */}
+              <div className="absolute top-5 left-5 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-2.5 flex items-center gap-2.5 transition-all duration-300 group-hover:scale-105">
+                <Image src="/images/logo-main.png" alt="Sango Information Hub" width={90} height={27} className="h-7 w-auto object-contain" />
+              </div>
             </div>
+
+            {/* Floating info card below-left */}
             <div className="absolute -bottom-6 -left-4 md:-left-8 bg-white rounded-2xl shadow-xl p-4 flex items-center gap-3 max-w-[280px]">
-              <Image src="/images/logo-main.png" alt="Sango Information Hub" width={48} height={48} className="w-12 h-12 rounded-xl object-contain" />
+              <Image src="/images/logo-main.png" alt="Sango Information Hub" width={48} height={48} className="w-12 h-auto object-contain shrink-0" />
               <div>
                 <p className="font-bold text-[15px] leading-tight">Sango Information Hub</p>
                 <p className="text-[13px] text-slate-500">We care about Lake Victoria</p>
@@ -267,16 +283,21 @@ export default function LandingPage() {
                 <Eyebrow>From the newsroom</Eyebrow>
                 <h2 className="font-heading text-[34px] md:text-[44px] font-bold leading-tight mt-3">Latest stories</h2>
               </div>
-              <Link href="/portal" className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-slate-300 hover:border-slate-900 text-[15px] font-semibold transition-colors w-fit">
-                All news <ArrowRight size={16} />
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link href="/portal/submit" className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-sky-600 hover:bg-sky-500 text-white text-[15px] font-semibold transition-colors">
+                  + Submit article
+                </Link>
+                <Link href="/portal" className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-slate-300 hover:border-slate-900 text-[15px] font-semibold transition-colors w-fit">
+                  All news <ArrowRight size={16} />
+                </Link>
+              </div>
             </div>
             <div className="grid md:grid-cols-3 gap-6 mt-10">
               {stories.slice(0, 3).map((s, i) => (
                 <motion.div key={s.id} variants={fade} initial="hidden" whileInView="show" viewport={{ once: true, margin: "-60px" }} custom={i}>
                   <Link href={`/portal/article/${s.id}`} className="group block">
                     <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100">
-                      <Image src={s.image || "/images/lake-victoria-bg.png"} alt="" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <Image src={s.image || "/images/lake-fisherman-hero.jpg"} alt={s.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
                     </div>
                     <p className="text-[13px] font-semibold text-sky-700 mt-4">{s.category}</p>
                     <h3 className="font-heading text-[19px] font-bold leading-snug mt-1 line-clamp-2 group-hover:text-sky-700 transition-colors">{s.title}</h3>

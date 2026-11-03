@@ -16,7 +16,7 @@ import "./dapp.css";
  */
 
 const PRICES = [
-  { s: "HBAR", p: "0.0891", c: "+3.2%" },
+  { s: "AVAX", p: "28.42", c: "+4.1%" },
   { s: "USDT", p: "1.0000", c: "0.0%" },
   { s: "SIHU", p: "0.1020", c: "+12.4%" },
   { s: "SANGO", p: "0.0501", c: "+5.1%" },
@@ -25,11 +25,11 @@ const PRICES = [
 const ACTIONS = [
   { name: "Mine", href: "/dapp/mine", Icon: Pickaxe, text: "Earn SIHU for verified stewardship work.", tint: "from-sky-500/20 text-sky-300" },
   { name: "Pools", href: "/dapp/pools", Icon: Droplets, text: "Add liquidity to community pools.", tint: "from-cyan-500/20 text-cyan-300" },
-  { name: "Swap", href: "/dapp/swap", Icon: ArrowLeftRight, text: "Exchange HBAR, SIHU and USDT.", tint: "from-emerald-500/20 text-emerald-300" },
+  { name: "Swap", href: "/dapp/swap", Icon: ArrowLeftRight, text: "Exchange AVAX, SIHU and USDT.", tint: "from-emerald-500/20 text-emerald-300" },
   { name: "Vaults", href: "/dapp/vaults", Icon: Landmark, text: "Save and grow tokens over time.", tint: "from-violet-500/20 text-violet-300" },
 ];
 
-const WALLET_NAMES: Record<string, string> = { native: "SIHU wallet", hashpack: "HashPack", metamask: "MetaMask" };
+const WALLET_NAMES: Record<string, string> = { native: "SIHU wallet", core: "Core Wallet", metamask: "MetaMask" };
 
 export default function SihuDApp() {
   const { connected, accountId, walletType, balances, autoMineActive, toggleAutoMine, incrementSihu, disconnectWallet } = useSihuStore();
@@ -47,7 +47,7 @@ export default function SihuDApp() {
     try { await navigator.clipboard.writeText(accountId); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch { /* no clipboard */ }
   };
 
-  const total = balances.hbar * 0.0891 + balances.sihu * 0.102 + balances.usdt;
+  const total = balances.avax * 28.42 + balances.sihu * 0.102 + balances.usdt;
 
   return (
     <main className="relative overflow-hidden pb-24">
@@ -58,12 +58,12 @@ export default function SihuDApp() {
         {/* Heading */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-400/10 border border-sky-400/20 text-sky-300 text-[12.5px] font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-300 animate-pulse" /> SIHU Network · Phase 1
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-400/10 border border-red-400/20 text-red-300 text-[12.5px] font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-300 animate-pulse" /> SIHU Network · Avalanche C-Chain
             </span>
             <h1 className="font-heading text-[34px] md:text-5xl font-bold mt-4 leading-tight">Rewards for caring for the lake</h1>
             <p className="text-slate-300 text-[16px] md:text-lg mt-3 max-w-2xl leading-relaxed">
-              Earn, save and exchange SIHU tokens for verified environmental work around Lake Victoria, on the Hedera network.
+              Earn, save and exchange SIHU tokens for verified environmental work around Lake Victoria, on the Avalanche network.
             </p>
           </div>
           {!connected && (
@@ -74,7 +74,7 @@ export default function SihuDApp() {
         </div>
 
         <p className="mt-6 flex items-start gap-2 text-[13.5px] text-amber-200/90 bg-amber-400/10 border border-amber-400/20 rounded-2xl px-4 py-3 max-w-3xl">
-          <Info size={16} className="shrink-0 mt-0.5" /> Demo version: balances, prices and network figures below are sample values while the SIHU Network is being built. No real money is used.
+          <Info size={16} className="shrink-0 mt-0.5" /> Demo version: balances, prices and network figures below are sample values while the SIHU Network is being built on Avalanche C-Chain (Fuji Testnet). No real money is used.
         </p>
 
         <div className="grid lg:grid-cols-3 gap-5 mt-8">
@@ -97,7 +97,7 @@ export default function SihuDApp() {
                 <p className="font-heading text-4xl md:text-5xl font-bold mt-1">${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 <div className="grid grid-cols-3 gap-3 mt-6">
                   {[
-                    { l: "HBAR", v: balances.hbar.toFixed(2) },
+                    { l: "AVAX", v: balances.avax.toFixed(4) },
                     { l: "SIHU", v: balances.sihu.toFixed(1) },
                     { l: "USDT", v: balances.usdt.toFixed(2) },
                   ].map((b) => (
@@ -112,7 +112,7 @@ export default function SihuDApp() {
               <div className="flex flex-col items-start">
                 <span className="w-14 h-14 rounded-2xl bg-sky-400/10 text-sky-300 flex items-center justify-center"><Wallet size={26} /></span>
                 <h2 className="font-heading text-2xl font-bold mt-5">Connect a wallet to start</h2>
-                <p className="text-slate-400 text-[15px] mt-2 max-w-md leading-relaxed">Use the SIHU wallet, HashPack or MetaMask. You will see your HBAR, SIHU and USDT balances here.</p>
+                <p className="text-slate-400 text-[15px] mt-2 max-w-md leading-relaxed">Use the SIHU wallet, Core or MetaMask. You will see your AVAX, SIHU and USDT balances here.</p>
                 <button onClick={() => setShowModal(true)} className="mt-6 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white text-slate-900 font-semibold hover:bg-sky-100 transition-colors">
                   <Wallet size={17} /> Connect wallet
                 </button>
