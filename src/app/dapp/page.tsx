@@ -2,12 +2,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSihuStore } from "@/store/useSihuStore";
+import { useAvaxBalance } from "@/hooks/useAvaxBalance";
 import WalletConnectModal from "@/components/dapp/WalletConnectModal";
 import {
-  Wallet, Copy, Check, LogOut, Cpu, Pickaxe, Droplets, ArrowLeftRight, Landmark, ArrowRight, Sprout, Store,
-  Info, TrendingUp, Users, Percent,
+  Wallet, Copy, Check, LogOut, Cpu, Pickaxe, Droplets, ArrowLeftRight,
+  Landmark, ArrowRight, Sprout, Store, Info, TrendingUp, Users, Percent,
+  RefreshCw, ExternalLink,
 } from "lucide-react";
 import { KAI_URL } from "@/services/kaiHubService";
+import { shortAddress, explorerLink, network } from "@/services/avalancheService";
 import "./dapp.css";
 
 /*
@@ -33,10 +36,10 @@ const WALLET_NAMES: Record<string, string> = { native: "SIHU wallet", core: "Cor
 
 export default function SihuDApp() {
   const { connected, accountId, walletType, balances, autoMineActive, toggleAutoMine, incrementSihu, disconnectWallet } = useSihuStore();
+  const { refresh } = useAvaxBalance();
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // The drop agent adds a little SIHU every second while it is on (demo).
   useEffect(() => {
     if (!autoMineActive) return;
     const id = setInterval(() => incrementSihu(0.003), 1000);
@@ -84,26 +87,41 @@ export default function SihuDApp() {
               <>
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-[13px] text-slate-400">{WALLET_NAMES[walletType ?? ""] ?? "Wallet"} · connected</p>
-                    <button onClick={copy} className="mt-1 inline-flex items-center gap-2 font-mono text-[17px] text-white hover:text-sky-300 transition-colors" title="Copy account id">
-                      {accountId} {copied ? <Check size={15} className="text-emerald-400" /> : <Copy size={15} className="text-slate-500" />}
+                    <p className="text-[13px] text-slate-400">{WALLET_NAMES[walletType ?? ""] ?? "Wallet"} · connected · {network.name}</p>
+                    <button onClick={copy} className="mt-1 inline-flex items-center gap-2 font-mono text-[15px] text-white hover:text-sky-300 transition-colors" title="Copy address">
+                      {shortAddress(accountId, 6)} {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} className="text-slate-500" />}
                     </button>
                   </div>
-                  <button onClick={disconnectWallet} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[13.5px] font-semibold text-slate-300 transition-colors">
-                    <LogOut size={15} /> Disconnect
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <a href={explorerLink(accountId, "address")} target="_blank" rel="noopener noreferrer"
+                      className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors" title="View on explorer">
+                      <ExternalLink size={15} />
+                    </a>
+                    <button onClick={refresh} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors" title="Refresh balance">
+                      <RefreshCw size={15} />
+                    </button>
+                    <button onClick={disconnectWallet} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[13.5px] font-semibold text-slate-300 transition-colors">
+                      <LogOut size={15} /> Disconnect
+                    </button>
+                  </div>
                 </div>
-                <p className="text-[13px] text-slate-400 mt-8">Total value</p>
-                <p className="font-heading text-4xl md:text-5xl font-bold mt-1">${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p className="text-[13px] text-slate-400 mt-8">Total value (USD)</p>
+                <p className="font-heading text-4xl md:text-5xl font-bold mt-1">
+                  ${(Number(balances.avaxUsd) + balances.sihu * 0.102 + balances.usdt).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
                 <div className="grid grid-cols-3 gap-3 mt-6">
                   {[
-                    { l: "AVAX", v: balances.avax.toFixed(4) },
-                    { l: "SIHU", v: balances.sihu.toFixed(1) },
-                    { l: "USDT", v: balances.usdt.toFixed(2) },
+                    { l: "AVAX", v: balances.avax.toFixed(4), sub: `$${balances.avaxUsd}`, live: true },
+                    { l: "SIHU", v: balances.sihu.toFixed(1), sub: "demo", live: false },
+                    { l: "USDT", v: balances.usdt.toFixed(2), sub: "demo", live: false },
                   ].map((b) => (
                     <div key={b.l} className="rounded-2xl bg-white/[0.04] border border-white/10 p-4">
-                      <p className="text-[12.5px] text-slate-400 font-semibold">{b.l}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[12.5px] text-slate-400 font-semibold">{b.l}</p>
+                        {b.live && <span className="text-[9px] font-bold text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded-full uppercase">live</span>}
+                      </div>
                       <p className="text-[19px] md:text-[22px] font-bold mt-1 tabular-nums">{b.v}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{b.sub}</p>
                     </div>
                   ))}
                 </div>
